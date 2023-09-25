@@ -60,33 +60,6 @@ This is done in the presence or absence of prognostic factors.
 The prognostic factor when available will always be forced to be in the model so no penalty for it.
 Optimum lambda will be used to select the non-zero shrinkage coefficients, the nonzero selceted taxa will thus be used in the survival analysis and in calculation of the risk scores.
 }
-\examples{
-\donttest{
-# Using the function
-lasso_fam_shan_w3 = Lasoelascox(Survival = survival_data_w3$Survival,
-                                Censor = survival_data_w3$Censor,
-                                Micro.mat = fam_shan_trim_w3,
-                                Prognostic = prog_fam_w3,
-                                Plots = TRUE,
-                                Standardize = TRUE,
-                                Alpha = 1,
-                                Fold = 4,
-                                nlambda = 100,
-                                Mean = TRUE)
-
-# View the selected taxa
-lasso_fam_shan_w3$Selected.mi
-
-# Number of selected taxa
-lasso_fam_shan_w3$n
-
-# View the classification group of each subject
-lasso_fam_shan_w3$Risk.Group
-
-# View the survival analysis result
-lasso_fam_shan_w3$SurvFit
-}
-}
 \seealso{
 \code{\link[survival]{coxph}}
 

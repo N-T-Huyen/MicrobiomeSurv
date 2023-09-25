@@ -44,29 +44,6 @@ Class of object returned by function \code{\link[MicrobiomeSurv]{CVPcaPls}}.
 \item{\code{Select}}{The number of taxa used for the dimesion reduction method used}
 }}
 
-\examples{
-## GENERATE SOME MICROBIOME SURVIVAL DATA WITH PROGNOSTIC FACTORS
-Data <- MSData(nPatients=100, nOTU=150, nFam = 20, Prop=0.5)
-
-## USING THE FUNCTION
-Result = CVPcaPls(Fold = 4,
-                  Survival = Data$Survival,
-                  Mdata = t(Data$Mdata),
-                  Censor = Data$Censor,
-                  Reduce=TRUE,
-                  Select=15,
-                  Prognostic= Data$Prognostic,
-                  Ncv=100,
-                  DR ="PLS")
-
-## GET THE CLASS OF THE OBJECT
-class(Result)     # A "cvpp" Class
-
-##  METHOD THAT CAN BE USED FOR THE RESULT
-show(Result)
-summary(Result)
-plot(Result)
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{CVPcaPls}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}
 }

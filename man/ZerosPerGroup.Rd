@@ -40,21 +40,6 @@ A matrix with information of number and the proportion of zeros per groups.
 \description{
 This function returns a matrix with rows are Micros and 9 columns containing number and the proportion of zeros per groups of treatments and in total.
 }
-\examples{
-\donttest{
-Week3_otu$Treatment_new = ifelse(Week3_otu$Treatment == "3PATCON", 0, 1)
-n_obs = dim(otu_w3)[2]
-n_control = table(Week3_otu$Treatment_new)[1]
-n_treated = table(Week3_otu$Treatment_new)[2]
-n_otu = dim(otu_mat_w3)[1]
-# Calculate zeros per groups
-zero_per_group_otu_w3 = ZerosPerGroup(Micro.mat = otu_mat_w3,
-                                     groups = Week3_otu$Treatment_new, week = 3,
-                                     n.obs = n_obs, n.control = n_control,
-                                     n.treated = n_treated, n.mi = n_otu,
-                                     plot = TRUE)
-}
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{ZerosPerGroup}}
 }

@@ -16,12 +16,6 @@ A relative abundance matrix of OTUs
 \description{
 This function convert OTU matrix to RA matrix.
 }
-\examples{
-\donttest{
-# Convert absolute abundance to relative abundance
-ra_otu_trim_w3 = GetRA(Micro.mat = otu_trim_w3)
-}
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{GetRA}}
 }

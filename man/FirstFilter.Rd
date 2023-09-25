@@ -19,18 +19,6 @@ A smaller microbiome matrix.
 This function is used for the first step of filtering which removes OTUs having all zeros (inactive OTUs).
 The input is an OTU matrix with rows are OTUs and columns are subjects.
 }
-\examples{
-\donttest{
-# Preparing data for analysis at OTU level
-Week3_otu = read_excel("Week3_otu.xlsx")
-Week3_otu = data.frame(Week3_otu)
-otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
-colnames(otu_mat_w3) = Week3_otu$SampleID
-# Filtering first step
-otu_w3 = FirstFilter(Micro.mat = otu_mat_w3)
-}
-
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{FirstFilter}}
 }

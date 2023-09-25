@@ -31,14 +31,6 @@ This function finds out the taxon has the smallest p-value, then calculate risk 
 Categorized subjects into high or low risk groups based on the mean of the risk score as a cutoff point
 Checking whether the two groups are significant difference in the probability to be survival.
 }
-\examples{
-\donttest{
-# Analysis of the taxon having smallest p-value (in the result of using CoxPHUni function)
-top1_fam_shan_w3 = Top1Uni(Result = summary_fam_shan_w3, Micro.mat = fam_shan_trim_w3,
-                           Survival = surv_fam_shan_w3$Survival, Censor = surv_fam_shan_w3$Censor,
-                           Plots = TRUE)
-}
-}
 \author{
 Thi Huyen Nguyen, \email{thihuyen.nguyen@uhasselt.be}
 

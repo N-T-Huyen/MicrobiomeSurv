@@ -53,32 +53,6 @@ Any parameters of \code{\link[graphics]{plot.default}} may be passed on to this 
 \item{\code{Rdata}}{The microbiome data matrix that was used for the analysis either same as Micro.mat or a reduced version}
 }}
 
-\examples{
-\donttest{
-## GENERATE SOME MICROBIOME SURVIVAL DATA WITH PROGNOSTIC FACTORS
-Data<-MSData(nPatients=100, nOTU=150, nFam = 20, Prop=0.5)
-
-## USING THE FUNCTION
-Result = CVMSpecificCoxPh(Fold=3,
-                          Survival=Data$Survival,
-                          Micro.mat=t(Data$Micro.mat),
-                          Censor= Data$Censor,
-                          Reduce=TRUE,
-                          Select=15,
-                          Prognostic=Data$Prognostic,
-                          Mean = TRUE,
-                          Quantile = 0.5,
-                          Ncv=3)
-
-## GET THE CLASS OF THE OBJECT
-class(Result)     # An "cvmm" Class
-
-##  METHOD THAT CAN BE USED FOR THIS CLASS
-show(Result)
-summary(Result)
-plot(Result)
-}
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{CVMspecificCoxPh}}
 }

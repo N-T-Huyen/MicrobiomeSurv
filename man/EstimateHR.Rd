@@ -42,27 +42,6 @@ The risk scores obtained using the taxa is then used to generate the risk group 
 A Cox model is then fitted with the risk group as covariate in the presence or absence of  prognostic factors and or treatment effect.
 The extent of survival in the risk groups is known
 }
-\examples{
-\donttest{
-# Obtaning the risk score and data survival
-lasso_fam_shan_w3 = Lasoelascox(Survival = survival_data_w3$Survival,
-                                Censor = survival_data_w3$Censor,
-                                Micro.mat = fam_shan_trim_w3,
-                                Prognostic = prog_fam_shan_w3,
-                                Plots = TRUE,
-                                Standardize = TRUE,
-                                Alpha = 1,
-                                Fold = 4,
-                                nlambda = 100,
-                                Mean = TRUE)
-
-# Using the function
-est_HR_fam_shan_w3 = EstimateHR(Risk.Scores = lasso_fam_shan_w3$Risk.Scores,
-                                Data.Survival = lasso_fam_shan_w3$Data.Survival,
-                                Prognostic = prog_fam_shan_w3, Plots = TRUE,
-                                Mean = TRUE)
-}
-}
 \seealso{
 \code{\link[survival]{coxph}},
 \code{\link[MicrobiomeSurv]{EstimateHR}},

@@ -21,24 +21,6 @@ This function outputs the mostly selected taxa during the LASSO and Elastic-net 
 Selected top taxa are ranked based on frequency of selection and also a particular frequency can be selected.
 In addition, it visualizes the selected top taxa based on the minimum frequency specified.
 }
-\examples{
-\donttest{
-# Cross-Validation for LASSO and ELASTIC-NET
-CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = survival_data_w3$Survival,
-                                     Censor = survival_data_w3$Censor,
-                                     Micro.mat = fam_shan_trim_w3,
-                                     Prognostic = prog_fam_w3,
-                                     Standardize = TRUE,
-                                     Alpha = 1,
-                                     Fold = 4,
-                                     Ncv = 100,
-                                     nlambda = 100)
-
-
-# Using the function
-MiFreq_fam_shan_w3 = MiFreq(Object = CV_lasso_fam_shan_w3, TopK=5)
-}
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{cvmm}}, \code{\link[survival]{coxph}},
 \code{\link[MicrobiomeSurv]{EstimateHR}},\code{\link[MicrobiomeSurv]{CVLasoelacox}}

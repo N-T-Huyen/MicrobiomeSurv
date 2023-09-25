@@ -20,21 +20,6 @@ A matrix of the selected measurement of the chosen level.
 \description{
 This function gives indices such as Observed richness, Shannon index, Inverse Simpson, ... of higher level such as levelily, order, phylum, ...
 }
-\examples{
-\donttest{
-# Preparing data for analysis at family level
-fam = otus_data[c("Family", "OTUID")]
-otus$OTUID = row.names(otus)
-otufam = inner_join(otus, fam)
-otu_fam_w3 = otufam[ ,which(colnames(otufam) \%in\% c(Week3_response$SampleID, "OTUID", "Family"))]
-fam_w3 = otu_fam_w3[ ,c("OTUID", "Family")]
-otu_data_w3 = otu_fam_w3[ , 1:n_obs]
-rownames(otu_data_w3) = otu_fam_w3$OTUID
-
-# USing the function
-fam_shan_w3 = SummaryData(Micro.mat = otu_data_w3, info = fam_w3, measure = "shannon")
-}
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{SummaryData}}
 }

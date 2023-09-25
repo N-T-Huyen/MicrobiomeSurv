@@ -55,34 +55,6 @@ And classifier is then built based on the first PLS scores multiplied by its est
 Patients are classified using mean of the risk scores as default. However, user can choose any quantile.
 This function can handle single and multiple taxa. Prognostic factors can also be included to enhance classification.
 }
-\examples{
-\donttest{
-# Using the function
-SPLS_fam_shan_w3 = SurvPlsClass(Survival = survival_data_w3$Survival,
-                                Micro.mat = fam_shan_trim_w3,
-                                Censor = survival_data_w3$Censor,
-                                Reduce=TRUE,
-                                Select=5,
-                                Prognostic = prog_fam_w3,
-                                Plots = TRUE,
-                                Mean = TRUE)
-
-# Getting the survival regression output
-SPLS_fam_shan_w3$SurvFit
-
-# Getting the riskscores
-SPLS_fam_shan_w3$Riskscores
-
-# Getting the riskgroup
-SPLS_fam_shan_w3$Riskgroup
-
-# Obtaining the first principal component scores
-SPLS_fam_shan_w3$pc1
-}
-}
-\references{
-\insertRef{ye1}{microbiomeSurv}
-}
 \seealso{
 \code{\link[survival]{coxph}},
 \code{\link[microbiomeSurv]{EstimateHR}}, \code{\link[pls]{plsr}},

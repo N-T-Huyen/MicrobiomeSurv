@@ -60,27 +60,6 @@ Several ways of permutation setting can be implemented.
 That is, the function can be used to generate null distributions for four different validation schemes which are PLS based, PCA based, Majority votes based and Lasso based.
 Note this function internally calls function  \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}, \code{\link[MicrobiomeSurv]{Majorityvotes}}, and \code{\link[MicrobiomeSurv]{Lasoelascox}}.
 }
-\examples{
-\donttest{
-# Using the function
-DistHR_fam_shan_w3 = DistHR(Survival = survival_data_w3$Survival,
-                            Micro.mat = fam_shan_trim_w3,
-                            Censor = survival_data_w3$Censor,
-                            Prognostic=prog_fam_w3,
-                            Mean = TRUE,
-                            Quantile=0.5,
-                            Reduce= FALSE,
-                            Select = 5,
-                            nperm=100,
-                            case=4,
-                            Validation="PCAbased")
-
-# Method that can be used for the result
-show(DistHR_fam_shan_w3)
-summary(DistHR_fam_shan_w3)
-plot(DistHR_fam_shan_w3)
-}
-}
 \seealso{
 \code{\link[survival]{coxph}}, \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}, \code{\link[MicrobiomeSurv]{Majorityvotes}}, \code{\link[MicrobiomeSurv]{Lasoelascox}}, \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{Lasoelascox}}
 }

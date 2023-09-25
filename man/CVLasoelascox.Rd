@@ -58,32 +58,6 @@ Taxa are selected at each iteration and then use for the classifier.
 Which implies that predictive taxa is varied from one cross validation to the other depending on selection.
 The underline idea is to investigate the Hazard Ratio for the train and test data based on the optimal lambda selected for the non-zero shrinkage coefficients, the nonzero selected taxa will thus be used in the survival analysis and in calculation of the risk scores for each sets of data.
 }
-\examples{
-\donttest{
-# Using the function
-CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = survival_data_w3$Survival,
-                                     Censor = survival_data_w3$Censor,
-                                     Micro.mat = fam_shan_trim_w3,
-                                     Prognostic = prog_fam_w3,
-                                     Standardize = TRUE,
-                                     Alpha = 1,
-                                     Fold = 4,
-                                     Ncv = 100,
-                                     nlambda = 100)
-
-# Number of selected taxa per CV
-CV_lasso_fam_shan_w3@n
-
-# Get the matrix of coefficients
-Results@Coef.mat
-
-# Survival information of the train dataset
-Results@HRTrain
-
-# Survival information of the test dataset
-Results@HRTest
-}
-}
 \seealso{
 \code{\link[survival]{coxph}},
 \code{\link[Microbiome]{EstimateHR}}, \code{\link[glmnet]{glmnet}}, \code{\link[Microbiome]{Lasoelacox}}

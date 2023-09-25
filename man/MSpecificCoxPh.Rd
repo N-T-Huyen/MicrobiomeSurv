@@ -47,24 +47,6 @@ The Function fits cox proportional hazard model and does classification for each
 This function fits  taxon by taxon Cox proportional hazard model and perform the classification based on a microbiome risk score which has been estimated using a single taxon.
 Function is useful for majority vote classification method and taxon by taxon analysis and also for top K taxa.
 }
-\examples{
-\donttest{
-# Using the function
-Cox_taxon_fam_shan_w3 = MSpecificCoxPh(Survival = surv_fam_shan_w3$Survival,
-                                      Micro.mat = fam_shan_trim_w3,
-                                      Censor = surv_fam_shan_w3$Censor,
-                                      Reduce=TRUE,
-                                      Select=5,
-                                      Prognostic = prog_fam_shan_w3,
-                                      Mean = TRUE,
-                                      Method = "BH")
-
-# Results
-show(Cox_taxon_fam_shan_w3)
-summary(Cox_taxon_fam_shan_w3)
-}
-
-}
 \seealso{
 \code{\link[survival]{coxph}},  \code{\link[MicrobiomeSurv]{EstimateHR}}
 }

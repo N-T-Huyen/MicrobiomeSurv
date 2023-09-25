@@ -45,33 +45,6 @@ The first, third and last vertical line on the plot are the lower,
 median  and upper CI of the permuted data estimated HR while
 the red line is the estimated HR of the original data
 }
-\examples{
-\donttest{
-## GENERATE SOME MICROBIOME SURVIVAL DATA WITH PROGNOSTIC FACTORS
-Data <- MSData(nPatients=100, nOTU=150, nFam = 20, Prop=0.5)
-
-## USING THE FUNCTION
-Example <- DistHR(Survival = Data$Survival,
-                  Mdata = t(Data$Mdata),
-                  Censor = Data$Censor,
-                  Reduce=FALSE,
-                  Select=15,
-                  Prognostic=Data$Prognostic,
-                  Mean = TRUE,
-                  Quantile = 0.5, 
-                  nperm=10, 
-                  case=2, 
-                  Validation=c("L1based"))
-
-## GET THE CLASS OF THE OBJECT
-class(Example)     # A "perm" Class
-
-## METHOD THAT CAN BE USED FOR THIS CLASS
-show(Example)
-summary(Example)
-plot(Example)
-}
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{DistHR}}, \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}, \code{\link[MicrobiomeSurv]{Majorityvotes}}, \code{\link[MicrobiomeSurv]{Lasoelacox}}
 }

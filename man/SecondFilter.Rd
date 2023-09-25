@@ -24,13 +24,6 @@ A smaller microbiome matrix.
 \description{
 This function is used for the second step of filtering which removes OTUs based on a threshold.
 }
-\examples{
-\donttest{
-# Using the function
-otu_trim_w3 = SecondFilter(zero.per.group = zero_per_group_otu_w3[[1]],
-                           Micro.mat = otu_w3, threshold = 0.7, week = 3)
-}
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{SecondFilter}}
 

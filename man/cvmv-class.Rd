@@ -42,30 +42,6 @@ Class of object returned by function \code{\link[MicrobiomeSurv]{CVMajorityvotes
 \item{\code{Progfact}}{The names of prognostic factors used.}
 }}
 
-\examples{
-\donttest{
-## GENERATE SOME MICROBIOME SURVIVAL DATA WITH PROGNOSTIC FACTORS
-Data <- MSData(nPatients=100, nOTU=150, nFam = 20, Prop=0.5)
-
-## USING THE FUNCTION
-Result = CVMajorityvotes(Survival=Data$Survival,
-                         Censor=Data$Censor,
-                         Prognostic=Data$Prognostic,
-                         Micro.mat=t(Data$Micro.mat),
-                         Reduce=FALSE,
-                         Select=5,
-                         Fold=3,
-                         Ncv=10)
-
-## GET THE CLASS OF THE OBJECT
-class(Result)     # A "cvmv" Class
-
-##  METHOD THAT CAN BE USED FOR THE RESULT
-show(Result)
-summary(Result)
-plot(Result)
-}
-}
 \seealso{
 \code{\link[MicrobiomeSurv]{Majorityvotes}}, \code{\link[MicrobiomeSurv]{CVPcaPls}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}
 }
