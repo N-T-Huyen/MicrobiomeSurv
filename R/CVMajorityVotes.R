@@ -21,11 +21,46 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{Majorityvotes}}
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
+#' # Using the function
+#' CVMajority_fam_shan_w3 = CVMajorityvotes(Survival = survival_data_w3$Survival,
+#'                                          Micro.mat = fam_shan_trim_w3,
+#'                                          Censor = survival_data_w3$Censor,
+#'                                          Reduce=TRUE,
+#'                                          Select=5,
+#'                                          Mean = TRUE,
+#'                                          Prognostic = prog_fam_w3,
+#'                                          Fold=3,
+#'                                          Ncv=100)
+#'
+#' # Get the class of the object
+#' class(CVMajority_fam_shan_w3)     # An "cvmv" Class
+#'
+#' # Method that can be used for the result
+#' show(CVMajority_fam_shan_w3)
+#' summary(CVMajority_fam_shan_w3)
+#' plot(CVMajority_fam_shan_w3)
+#' }
 #' @import survival
 #' @export CVMajorityvotes
 
-CVMajorityvotes <- function(Survival,
+CVMajorityvotes = function(Survival,
                           Censor,
                           Prognostic=NULL,
                           Micro.mat,
@@ -44,17 +79,17 @@ CVMajorityvotes <- function(Survival,
 
   if (Reduce) {
     if (is.null(Prognostic)){
-      DataForReduction<-list(x=Micro.mat,y=Survival, censoring.status=Censor, mi.names=rownames(Micro.mat))
-      TentativeList<-names(sort(abs(superpc::superpc.train(DataForReduction, type="survival")$feature.scores),decreasing =TRUE))[1:Select]
+      DataForReduction=list(x=Micro.mat,y=Survival, censoring.status=Censor, mi.names=rownames(Micro.mat))
+      TentativeList=names(sort(abs(superpc::superpc.train(DataForReduction, type="survival")$feature.scores),decreasing =TRUE))[1:Select]
       TentativeList
 
-      ReduMicro.mat<-Micro.mat[TentativeList, ]
+      ReduMicro.mat=Micro.mat[TentativeList, ]
     }
 
     if (!is.null(Prognostic)){
       if (is.data.frame(Prognostic)) {
-        nPrgFac<-ncol(Prognostic)
-        NameProg<-colnames(Prognostic)
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
       }
 
       if (dim(Prognostic)[2] == 1){
@@ -65,7 +100,7 @@ CVMajorityvotes <- function(Survival,
 
       for(i in 1 : n.mi.full){
         xi = Micro.mat[i, ]
-        datai <- data.frame(Survival, Censor, xi, Prognostic)
+        datai = data.frame(Survival, Censor, xi, Prognostic)
         modeli = eval(parse(text = paste("survival::coxph(survival::Surv(Survival, Censor) ~ xi", paste("+", NameProg[1:nPrgFac], sep="", collapse =""), ",data=datai)" , sep="" )))
         coef[i] = round(summary(modeli)$coefficients[1,1], 4)
         exp.coef[i] = round(summary(modeli)$coefficients[1,2], 4)
@@ -76,60 +111,60 @@ CVMajorityvotes <- function(Survival,
       summary = cbind(coef, exp.coef, p.value.LRT, p.value)
       rownames(summary) = rownames(Micro.mat)
       colnames(summary) = c("coef", "exp.coef", "p.value.LRT", "p.value")
-      TentativeList<-names(sort(abs(summary[ ,"p.value.LRT"]),decreasing =TRUE))[1:Select]
+      TentativeList=names(sort(abs(summary[ ,"p.value.LRT"]),decreasing =TRUE))[1:Select]
       TentativeList
 
-      ReduMicro.mat <- Micro.mat[TentativeList, ]
+      ReduMicro.mat = Micro.mat[TentativeList, ]
       summary.reduced = summary[TentativeList, ]
     }
 
   } else {
-    ReduMicro.mat <- Micro.mat
+    ReduMicro.mat = Micro.mat
   }
 
 
-  n.mi<-nrow(ReduMicro.mat)
-  n.train<-(n.obs-floor(n.obs/Fold))
-  n.test<-floor(n.obs/Fold)
-  ind.train <-matrix(0,Ncv,n.train)
-  ind.test  <-matrix(0,Ncv,n.test)
-  res <-  vector("list", n.mi)
+  n.mi=nrow(ReduMicro.mat)
+  n.train=(n.obs-floor(n.obs/Fold))
+  n.test=floor(n.obs/Fold)
+  ind.train =matrix(0,Ncv,n.train)
+  ind.test  =matrix(0,Ncv,n.test)
+  res =  vector("list", n.mi)
 
 
-  HRp.train <- matrix(0,Ncv,3)  # Training
-  HRp.test <-  matrix(0,Ncv,3)     # Testing
+  HRp.train = matrix(0,Ncv,3)  # Training
+  HRp.test =  matrix(0,Ncv,3)     # Testing
 
   set.seed(123)
-  pIndex <- c(1:n.obs)
-  res <-res1<-res2<-res3<- vector("list", Ncv)
+  pIndex = c(1:n.obs)
+  res =res1=res2=res3= vector("list", Ncv)
 
   for (j in 1:Ncv){
     message('Cross validation loop ',j)
-    p1<-NA
-    p2<-NA
-    gr.train <- matrix(0, n.mi,ncol(ind.train))
-    gr.test  <- matrix(0,n.mi,ncol(ind.test))
+    p1=NA
+    p2=NA
+    gr.train = matrix(0, n.mi,ncol(ind.train))
+    gr.test  = matrix(0,n.mi,ncol(ind.test))
 
-    ind.train[j,] <-sort(sample(pIndex,n.train,replace=F) )
-    ind.test[j,] <-c(1:n.obs)[-c(intersect(ind.train[j,] ,c(1:n.obs)))]
+    ind.train[j,] =sort(sample(pIndex,n.train,replace=F) )
+    ind.test[j,] =c(1:n.obs)[-c(intersect(ind.train[j,] ,c(1:n.obs)))]
 
     #---------------------------------------  Training  Set -------------------------------------------
 
     for (i in 1:n.mi){
-      taxoni <- ReduMicro.mat[i,ind.train[j,]]
+      taxoni = ReduMicro.mat[i,ind.train[j,]]
 
       if (is.null(Prognostic)) {
 
-        cdata <- data.frame(Survival=Survival[ind.train[j,]], Censor=Censor[ind.train[j,]], taxoni)
-        m0 <- survival::coxph(survival::Surv(Survival, Censor==1) ~ taxoni, data=cdata)
+        cdata = data.frame(Survival=Survival[ind.train[j,]], Censor=Censor[ind.train[j,]], taxoni)
+        m0 = survival::coxph(survival::Surv(Survival, Censor==1) ~ taxoni, data=cdata)
       }
       if (!is.null(Prognostic)){
         if (is.data.frame(Prognostic)) {
-          nPrgFac<-ncol(Prognostic)
-          NameProg<-colnames(Prognostic)
-          cdata <- data.frame(Survival[ind.train[j,]], Censor[ind.train[j,]], taxoni, Prognostic[ind.train[j,],])
+          nPrgFac=ncol(Prognostic)
+          NameProg=colnames(Prognostic)
+          cdata = data.frame(Survival[ind.train[j,]], Censor[ind.train[j,]], taxoni, Prognostic[ind.train[j,],])
           colnames(cdata) = c("Survival", "Censor", "taxoni", NameProg)
-          eval(parse(text=paste( "m0 <-survival::coxph(survival::Surv(Survival, Censor==1) ~ taxoni",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+          eval(parse(text=paste( "m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ taxoni",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
         } else {
 
           stop(" Argument 'Prognostic' is NOT a data frame ")
@@ -137,104 +172,104 @@ CVMajorityvotes <- function(Survival,
 
       }
       #risk Score
-      beta1<-summary(m0)[[7]][c("taxoni"),1]
-      p1 <- beta1*taxoni
+      beta1=summary(m0)[[7]][c("taxoni"),1]
+      p1 = beta1*taxoni
       Prognostic.train=as.data.frame(Prognostic[ind.train[j,],])
       colnames(Prognostic.train) = NameProg
-      Temptaxoni <-EstimateHR(p1,Data.Survival=cdata, Prognostic=Prognostic.train, Plots = FALSE, Mean = TRUE, Quantile = quantile)
-      gr.train[i,]<-Temptaxoni$Riskgroup
+      Temptaxoni =EstimateHR(p1,Data.Survival=cdata, Prognostic=Prognostic.train, Plots = FALSE, Mean = TRUE, Quantile = quantile)
+      gr.train[i,]=Temptaxoni$Riskgroup
 
 
       #---------------------------------------  Testing  Set -------------------------------------------
-      taxonit <- ReduMicro.mat[i,ind.test[j,]]
+      taxonit = ReduMicro.mat[i,ind.test[j,]]
       if (!is.null(Prognostic)) {
         if (is.data.frame(Prognostic)) {
-          nPrgFac<-ncol(Prognostic)
-          NameProg<-colnames(Prognostic)
-          cdata <- data.frame(Survival[ind.test[j,]],Censor[ind.test[j,]],taxonit, Prognostic[ind.test[j,],])
+          nPrgFac=ncol(Prognostic)
+          NameProg=colnames(Prognostic)
+          cdata = data.frame(Survival[ind.test[j,]],Censor[ind.test[j,]],taxonit, Prognostic[ind.test[j,],])
           colnames(cdata) = c("Survival", "Censor", "taxonit", NameProg)
-          eval(parse(text=paste( "m0 <-survival::coxph(survival::Surv(Survival, Censor==1) ~ taxonit",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+          eval(parse(text=paste( "m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ taxonit",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
         } else {
     stop(" Argument 'Prognostic' is NOT a data frame ")
         }
 
       } else{
-        cdata <- data.frame(Survival=Survival[ind.test[j,]],Censor=Censor[ind.test[j,]],taxonit)
-        eval(parse(text=paste("m0 <-survival::coxph(survival::Surv(Survival, Censor==1) ~ taxonit",",data=cdata)" ,sep="")))
+        cdata = data.frame(Survival=Survival[ind.test[j,]],Censor=Censor[ind.test[j,]],taxonit)
+        eval(parse(text=paste("m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ taxonit",",data=cdata)" ,sep="")))
       }
 
 
-      beta1<-summary(m0)[[7]][c("taxonit"),1]
-      p2 <- beta1*taxonit
+      beta1=summary(m0)[[7]][c("taxonit"),1]
+      p2 = beta1*taxonit
       Prognostic.test=as.data.frame(Prognostic[ind.test[j,],])
       colnames(Prognostic.test) = NameProg
-      Temptaxonit <-EstimateHR(p2,Data.Survival=cdata, Prognostic=Prognostic.test, Plots = FALSE, Mean = TRUE, Quantile = Quantile)
-      gr.test[i,]<-Temptaxonit$Riskgroup
+      Temptaxonit =EstimateHR(p2,Data.Survival=cdata, Prognostic=Prognostic.test, Plots = FALSE, Mean = TRUE, Quantile = Quantile)
+      gr.test[i,]=Temptaxonit$Riskgroup
 
     } # END OF LOOP over taxa---------------------------------------------------------------------
 
     # ------------ count majority votes for jth Cross validation and estimate HR --------------
 
-    ggr.train <- per.R <- per.NR <- NULL
+    ggr.train = per.R = per.NR = NULL
     for (k in 1:ncol(ind.train)){
-      per.R[k]<-sum(gr.train[,k]=="Low risk")
-      ggr.train[k]<-ifelse((n.mi-per.R[k])>per.R[k],"High risk","Low risk")
+      per.R[k]=sum(gr.train[,k]=="Low risk")
+      ggr.train[k]=ifelse((n.mi-per.R[k])>per.R[k],"High risk","Low risk")
     }
 
 
 
     #-------------------- HR estimation for Training  ----------------------
-    GS<-as.factor(ggr.train)
+    GS=as.factor(ggr.train)
     if (is.null(Prognostic)) {
 
-      cdata <- data.frame(Survival=Survival[ind.train[j,]],Censor=Censor[ind.train[j,]],GS)
-      mTrain <- survival::coxph(survival::Surv(Survival, Censor==1) ~ GS,data=cdata)
+      cdata = data.frame(Survival=Survival[ind.train[j,]],Censor=Censor[ind.train[j,]],GS)
+      mTrain = survival::coxph(survival::Surv(Survival, Censor==1) ~ GS,data=cdata)
     }
     if (!is.null(Prognostic)) {
       if (is.data.frame(Prognostic)) {
-        nPrgFac<-ncol(Prognostic)
-        NameProg<-colnames(Prognostic)
-        cdata <- data.frame(Survival[ind.train[j,]],Censor[ind.train[j,]],GS, Prognostic[ind.train[j,],])
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
+        cdata = data.frame(Survival[ind.train[j,]],Censor[ind.train[j,]],GS, Prognostic[ind.train[j,],])
         colnames(cdata) = c("Survival", "Censor", "GS", NameProg)
-        eval(parse(text=paste( "mTrain <-survival::coxph(Surv(Survival, Censor==1) ~ GS",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+        eval(parse(text=paste( "mTrain =survival::coxph(Surv(Survival, Censor==1) ~ GS",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
       } else {
         stop(" Argument 'Prognostic' is NOT a data frame ")
       }
 
     }
-    HRp.train[j,]<-(summary(mTrain)[[8]][1,])[-2]
+    HRp.train[j,]=(summary(mTrain)[[8]][1,])[-2]
 
     #-------------------- HR estimation for Testing  ----------------------
-    ggr.test <- per.R<-per.NR <- NULL
+    ggr.test = per.R=per.NR = NULL
     for (k in 1:ncol(ind.test)){
-      per.R[k]<-sum(gr.test[,k]=="Low risk")
-      ggr.test[k]<-ifelse((n.mi-per.R[k])>per.R[k],"High risk","Low risk")
+      per.R[k]=sum(gr.test[,k]=="Low risk")
+      ggr.test[k]=ifelse((n.mi-per.R[k])>per.R[k],"High risk","Low risk")
     }
 
-    GS<-as.factor(ggr.test)
+    GS=as.factor(ggr.test)
     if (is.null(Prognostic)) {
 
-      cdata <- data.frame(Survival=Survival[ind.test[j,]],Censor=Censor[ind.test[j,]],GS)
-      mTest <- survival::coxph(survival::Surv(Survival, Censor==1) ~ GS,data=cdata)
+      cdata = data.frame(Survival=Survival[ind.test[j,]],Censor=Censor[ind.test[j,]],GS)
+      mTest = survival::coxph(survival::Surv(Survival, Censor==1) ~ GS,data=cdata)
     }
     if (!is.null(Prognostic)) {
       if (is.data.frame(Prognostic)) {
-        nPrgFac<-ncol(Prognostic)
-        NameProg<-colnames(Prognostic)
-        cdata <- data.frame(Survival[ind.test[j,]], Censor[ind.test[j,]], GS, Prognostic[ind.test[j,],])
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
+        cdata = data.frame(Survival[ind.test[j,]], Censor[ind.test[j,]], GS, Prognostic[ind.test[j,],])
         colnames(cdata) = c("Survival", "Censor", "GS", NameProg)
-        eval(parse(text=paste( "mTest <-survival::coxph(Surv(Survival, Censor==1) ~ GS",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+        eval(parse(text=paste( "mTest =survival::coxph(Surv(Survival, Censor==1) ~ GS",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
       } else {
         stop(" Argument 'Prognostic' is NOT a data frame ")
       }
 
     }
-    HRp.test[j,]<-(summary(mTest)[[8]][1,])[-2]
+    HRp.test[j,]=(summary(mTest)[[8]][1,])[-2]
 
   }#---------------------------  END OF  FOR LOOP over Cross Validations ------------------------
 
-  pFactors<-NA
-  if (!is.null(Prognostic)) pFactors <-colnames(Prognostic)
+  pFactors=NA
+  if (!is.null(Prognostic)) pFactors =colnames(Prognostic)
 
   return(new("cvmv",HRTrain=HRp.train,HRTest=HRp.test,Ncv=Ncv,Micro.mat=ReduMicro.mat, Progfact=pFactors))
   }

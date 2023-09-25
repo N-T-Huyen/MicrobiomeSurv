@@ -59,8 +59,8 @@ setMethod("summary",signature="perm", function(object){
   print(quantile(object@HRperm[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
   cat("\n")
   cat("Estimated HR on original data\n")
-  ttt<-object@HRobs
-  names(ttt)<-c("Estimate","lower95CI","Upper95CI")
+  ttt=object@HRobs
+  names(ttt)=c("Estimate","lower95CI","Upper95CI")
   print(ttt)
   })
 
@@ -78,27 +78,27 @@ setMethod("plot", signature("perm"),
           function(x, y, ...) {
             if (class(x)!="perm") stop("Invalid class object")
 
-            HR<-x@HRperm[,1]
-            HR<-na.exclude(HR)
-            n<-x@nperm
+            HR=x@HRperm[,1]
+            HR=na.exclude(HR)
+            n=x@nperm
             vv=x@HRobs[1]
-            pvalue<-sum(vv>HR)/n
+            pvalue=sum(vv>HR)/n
 
-             dotsCall <- substitute(list(...))
-            ll <- eval(dotsCall)
-            if(!hasArg("xlab")) ll$xlab <- paste("Estimated HR: Emperical p-value = ", pvalue ,sep="")
-            if(!hasArg("ylab")) ll$ylab <- ""
-            ll$main <- "Null Distribution of HR on Permuted Data \n for low risk group"
-            if(!hasArg("cex.lab")) ll$cex.lab <- 0.8
-            if(!hasArg("cex.main")) ll$cex.main <- 1
-            if(!hasArg("col")) ll$col <- 1
-            if(!hasArg("ylim")) ll$ylim <- c(0,4)
+             dotsCall = substitute(list(...))
+            ll = eval(dotsCall)
+            if(!hasArg("xlab")) ll$xlab = paste("Estimated HR: Emperical p-value = ", pvalue ,sep="")
+            if(!hasArg("ylab")) ll$ylab = ""
+            ll$main = "Null Distribution of HR on Permuted Data \n for low risk group"
+            if(!hasArg("cex.lab")) ll$cex.lab = 0.8
+            if(!hasArg("cex.main")) ll$cex.main = 1
+            if(!hasArg("col")) ll$col = 1
+            if(!hasArg("ylim")) ll$ylim = c(0,4)
 
-            ll$x <- density(HR,from=0,to=(max(HR)+0.25))
+            ll$x = density(HR,from=0,to=(max(HR)+0.25))
             do.call(plot,args=ll)
             abline(v=vv,col=2)
             #CI for permuated cases
-            qq<-quantile(sort(HR),prob=c(0.05,0.95))
+            qq=quantile(sort(HR),prob=c(0.05,0.95))
             abline(v=qq[1],col=3)
             abline(v=qq[2],col=3)
             abline(v=median(HR),col=3,lwd=3)

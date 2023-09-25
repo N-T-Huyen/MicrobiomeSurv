@@ -10,6 +10,17 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{SummaryData}}
+#' @examples
+#' \donttest{
+#' # Read dataset
+#' Week3_otu = read_excel("Week3_otu.xlsx")
+#' Week3_otu = data.frame(Week3_otu)
+#' otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
+#' fam_info_w3 = read_excel("fam_info_w3.xlsx")
+#'
+#' # USing the function
+#' fam_shan_w3 = SummaryData(Micro.mat = otu_mat_w3, info = fam_info_w3, measure = "shannon")
+#' }
 #' @export SummaryData
 
 SummaryData = function(Micro.mat, info, measure = "observed"){

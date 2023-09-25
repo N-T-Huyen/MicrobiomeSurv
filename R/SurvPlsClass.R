@@ -31,10 +31,49 @@
 #' @seealso \code{\link[survival]{coxph}},
 #' \code{\link[microbiomeSurv]{EstimateHR}}, \code{\link[pls]{plsr}},
 #'  \code{\link[microbiomeSurv]{SurvPcaClass}}
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+
+#' # Using the function
+#' SPLS_fam_shan_w3 = SurvPlsClass(Survival = survival_data_w3$Survival,
+#'                                 Micro.mat = fam_shan_trim_w3,
+#'                                 Censor = survival_data_w3$Censor,
+#'                                 Reduce=TRUE,
+#'                                 Select=5,
+#'                                 Prognostic = prog_fam_w3,
+#'                                 Plots = TRUE,
+#'                                 Mean = TRUE)
+#'
+#' # Getting the survival regression output
+#' SPLS_fam_shan_w3$SurvFit
+#'
+#' # Getting the riskscores
+#' SPLS_fam_shan_w3$Riskscores
+#'
+#' # Getting the riskgroup
+#' SPLS_fam_shan_w3$Riskgroup
+#'
+#' # Obtaining the first principal component scores
+#' SPLS_fam_shan_w3$pc1
+#' }
 #' @export SurvPlsClass
 
 
-SurvPlsClass<-function(
+SurvPlsClass=function(
   Survival,
   Micro.mat,
   Censor,
@@ -55,17 +94,17 @@ SurvPlsClass<-function(
 
   if (Reduce) {
     if (is.null(Prognostic)){
-      DataForReduction<-list(x=Micro.mat,y=Survival, censoring.status=Censor, mi.names=rownames(Micro.mat))
-      TentativeList<-names(sort(abs(superpc::superpc.train(DataForReduction, type="survival")$feature.scores),decreasing =TRUE))[1:Select]
+      DataForReduction=list(x=Micro.mat,y=Survival, censoring.status=Censor, mi.names=rownames(Micro.mat))
+      TentativeList=names(sort(abs(superpc::superpc.train(DataForReduction, type="survival")$feature.scores),decreasing =TRUE))[1:Select]
       TentativeList
 
-      ReduMicro.mat<-Micro.mat[TentativeList, ]
+      ReduMicro.mat=Micro.mat[TentativeList, ]
     }
 
     if (!is.null(Prognostic)){
       if (is.data.frame(Prognostic)) {
-        nPrgFac<-ncol(Prognostic)
-        NameProg<-colnames(Prognostic)
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
       }
 
       if (dim(Prognostic)[2] == 1){
@@ -76,7 +115,7 @@ SurvPlsClass<-function(
 
       for(i in 1 : n.mi.full){
         xi = Micro.mat[i, ]
-        datai <- data.frame(Survival, Censor, xi, Prognostic)
+        datai = data.frame(Survival, Censor, xi, Prognostic)
         modeli = eval(parse(text = paste("survival::coxph(survival::Surv(Survival, Censor) ~ xi", paste("+", NameProg[1:nPrgFac], sep="", collapse =""), ",data=datai)" , sep="" )))
         coef[i] = round(summary(modeli)$coefficients[1,1], 4)
         exp.coef[i] = round(summary(modeli)$coefficients[1,2], 4)
@@ -87,65 +126,65 @@ SurvPlsClass<-function(
       summary = cbind(coef, exp.coef, p.value.LRT, p.value)
       rownames(summary) = rownames(Micro.mat)
       colnames(summary) = c("coef", "exp.coef", "p.value.LRT", "p.value")
-      TentativeList<-names(sort(abs(summary[ ,"p.value.LRT"]),decreasing =TRUE))[1:Select]
+      TentativeList=names(sort(abs(summary[ ,"p.value.LRT"]),decreasing =TRUE))[1:Select]
       TentativeList
 
-      ReduMicro.mat <- Micro.mat[TentativeList, ]
+      ReduMicro.mat = Micro.mat[TentativeList, ]
       summary.reduced = summary[TentativeList, ]
     }
 
   } else {
-    ReduMicro.mat <- Micro.mat
+    ReduMicro.mat = Micro.mat
   }
 
 
-  n.mi<-nrow(ReduMicro.mat)
+  n.mi=nrow(ReduMicro.mat)
   if (is.matrix(ReduMicro.mat)) {
 
-    DataPLS<-data.frame(1:n.obs)
-    DataPLS$fam<-as.matrix(t(ReduMicro.mat))
-    colnames(DataPLS)[1]<-c("Survival")
-    DataPLS[,1]<-Survival
+    DataPLS=data.frame(1:n.obs)
+    DataPLS$fam=as.matrix(t(ReduMicro.mat))
+    colnames(DataPLS)[1]=c("Survival")
+    DataPLS[,1]=Survival
 
-    plsr.1 <- pls::plsr(Survival ~ fam, method="simpls", ncomp = 1, scale =TRUE, data = DataPLS, validation =  "CV")
-    pc1<-pls::scores(plsr.1)[,1] # extract the first column
+    plsr.1 = pls::plsr(Survival ~ fam, method="simpls", ncomp = 1, scale =TRUE, data = DataPLS, validation =  "CV")
+    pc1=pls::scores(plsr.1)[,1] # extract the first column
   } else {
-    pc1<-ReduMicro.mat
+    pc1=ReduMicro.mat
   }
 
   if (is.null(Prognostic)) {
 
-    cdata <- data.frame(Survival,Censor,pc1)
-    m0 <- survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1,data=cdata)
+    cdata = data.frame(Survival,Censor,pc1)
+    m0 = survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1,data=cdata)
   }
   if (!is.null(Prognostic)) {
     if (is.data.frame(Prognostic)) {
-      nPrgFac<-ncol(Prognostic)
-      cdata <- data.frame(Survival,Censor,pc1,Prognostic)
-      NameProg<-colnames(Prognostic)
-      eval(parse(text=paste( "m0 <-survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+      nPrgFac=ncol(Prognostic)
+      cdata = data.frame(Survival,Censor,pc1,Prognostic)
+      NameProg=colnames(Prognostic)
+      eval(parse(text=paste( "m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
     } else {
 
       stop(" Argument 'Prognostic' is NOT a data frame ")
     }
 
   }
-  Riskscores <- Riskgroup <- NULL
+  Riskscores = Riskgroup = NULL
 
   #risk Score
-  TrtandPC1<-summary(m0)[[7]][c("pc1"), 1]
-  p1 <- TrtandPC1*pc1
-  TempRes<- EstimateHR(Risk.Scores = p1, Data.Survival = cdata, Prognostic = Prognostic,
+  TrtandPC1=summary(m0)[[7]][c("pc1"), 1]
+  p1 = TrtandPC1*pc1
+  TempRes= EstimateHR(Risk.Scores = p1, Data.Survival = cdata, Prognostic = Prognostic,
                        Plots = TRUE, Mean = TRUE, Quantile = 0.5)
 
-  gg <- data.frame(Riskscores = p1,Riskgroup = TempRes$Riskgroup,pc1 = pc1)
-  ab <- ggplot2::ggplot(gg, ggplot2::aes(x=Riskscores, y=pc1, shape=Riskgroup, color=Riskgroup)) + ggplot2::geom_point()
+  gg = data.frame(Riskscores = p1,Riskgroup = TempRes$Riskgroup,pc1 = pc1)
+  ab = ggplot2::ggplot(gg, ggplot2::aes(x=Riskscores, y=pc1, shape=Riskgroup, color=Riskgroup)) + ggplot2::geom_point()
 
-  tempp<-list(SurvFit=TempRes$SurvResult,Riskscores = p1, Riskgroup=TempRes$Riskgroup,pc1=pc1)
-  class(tempp)<-"SurvPls"
+  tempp=list(SurvFit=TempRes$SurvResult,Riskscores = p1, Riskgroup=TempRes$Riskgroup,pc1=pc1)
+  class(tempp)="SurvPls"
 
-  temp<-list(SurvFit=TempRes$SurvResult,Riskscores = p1, Riskgroup=TempRes$Riskgroup,pc1=pc1, KMplot = TempRes$KMplot, SurvBPlot = TempRes$SurvBPlot, RiskPls = ab)
-  class(temp)<-"SurvPls"
+  temp=list(SurvFit=TempRes$SurvResult,Riskscores = p1, Riskgroup=TempRes$Riskgroup,pc1=pc1, KMplot = TempRes$KMplot, SurvBPlot = TempRes$SurvBPlot, RiskPls = ab)
+  class(temp)="SurvPls"
 
   if (Plots){
     return(temp)

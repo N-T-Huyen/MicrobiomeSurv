@@ -17,7 +17,32 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' \code{\link[MicrobiomeSurv]{Top1Uni}}
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
+#' Obtain summary statistics for families
+#' summary_fam_shan_w3 = CoxPHUni(Survival = surv_fam_shan_w3$Survival, Censor = surv_fam_shan_w3$Censor,
+#' Prognostic = prog_fam_shan_w3, Micro.mat = fam_shan_trim_w3, Method = "BH")
+#'
+#' # Analysis of the taxon having smallest p-value (in the result of using CoxPHUni function)
+#' top1_fam_shan_w3 = Top1Uni(Result = summary_fam_shan_w3, Micro.mat = fam_shan_trim_w3,
+#'                            Survival = surv_fam_shan_w3$Survival, Censor = surv_fam_shan_w3$Censor,
+#'                            Plots = TRUE)
+#' }
 #' @import utils
 #' @import stats
 #' @import Biobase
@@ -30,13 +55,13 @@ Top1Uni = function(Result, Micro.mat, Survival, Censor, Plots = FALSE){
   Result = Result[order(Result[ ,"p.value"]), ]
   name.top1 = rownames(Result)[1]
   sum.top1 = Result[1, c("coef", "exp.coef", "p.value.LRT", "p.value")]
-  risk.score.top1 = sum.top1["coef"]*Micro.mat[rownames(Result)[1], ]
+  risk.score.top1 = sum.top1["coef"] * Micro.mat[rownames(Result)[1], ]
 
   ## Group by high risk or low risk
   ## Based on cut-off value
 
   cut.top1 = mean(risk.score.top1)
-  risk.group.top1 <- ifelse(risk.score.top1 >= cut.top1,'High risk', 'Low risk')
+  risk.group.top1 = ifelse(risk.score.top1 >= cut.top1,'High risk', 'Low risk')
 
   if(Plots){
     ## Plot the observed Kaplan-Meier curves per group

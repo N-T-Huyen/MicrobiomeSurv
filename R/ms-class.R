@@ -58,19 +58,19 @@ setMethod("summary",signature="ms",function(object){
   cat("Top", length(object@Mi.names), " taxa out of ", length(object@Mi.names), "\n")
   cat("Estimated HR for the low risk group\n")
   # top taxa based on upper CI HR GS+
-  Names.Ktaxa<-object@Mi.names
-  index.Top.Ktaxa <- order(object@HRRG[,1],decreasing =FALSE)
-  index.Top.Ktaxa<-index.Top.Ktaxa[1:length(object@Mi.names)]
-  Top.Ktaxa.GSplus<-data.frame(Mi.names=Names.Ktaxa[index.Top.Ktaxa],object@HRRG[index.Top.Ktaxa,])
+  Names.Ktaxa=object@Mi.names
+  index.Top.Ktaxa = order(object@HRRG[,1],decreasing =FALSE)
+  index.Top.Ktaxa=index.Top.Ktaxa[1:length(object@Mi.names)]
+  Top.Ktaxa.GSplus=data.frame(Mi.names=Names.Ktaxa[index.Top.Ktaxa],object@HRRG[index.Top.Ktaxa,])
 
-  colnames(Top.Ktaxa.GSplus)<-c("Mi.names", "HR GS+", "LowerCI", "UpperCI", "p-value")
+  colnames(Top.Ktaxa.GSplus)=c("Mi.names", "HR GS+", "LowerCI", "UpperCI", "p-value")
   # FDR corrected CI for top k taxa
-  cilevel <- 1-0.05*length(object@Mi.names)/nrow(object@HRRG)
+  cilevel = 1-0.05*length(object@Mi.names)/nrow(object@HRRG)
 
-  HRpadj <- exp(log(object@HRRG[index.Top.Ktaxa,1]) + log(object@HRRG[index.Top.Ktaxa,c(2,3)])-log(object@HRRG[index.Top.Ktaxa,1])*qnorm(cilevel)/1.96)  #
-  res.topKtaxa<-data.frame(Top.Ktaxa.GSplus,HRpadj)
+  HRpadj = exp(log(object@HRRG[index.Top.Ktaxa,1]) + log(object@HRRG[index.Top.Ktaxa,c(2,3)])-log(object@HRRG[index.Top.Ktaxa,1])*qnorm(cilevel)/1.96)  #
+  res.topKtaxa=data.frame(Top.Ktaxa.GSplus,HRpadj)
 
-  colnames(res.topKtaxa)<-c("Mi.names", "HR", "LCI", "UCI", "p-value", "FDRLCI", "FDRUCI")
+  colnames(res.topKtaxa)=c("Mi.names", "HR", "LCI", "UCI", "p-value", "FDRLCI", "FDRUCI")
   print(res.topKtaxa)
 })
 
@@ -87,19 +87,19 @@ setMethod("summary",signature="ms",function(object){
 #' @aliases ms-method
 setMethod(f="plot", signature = "ms",
           definition = function(x,y,...){
-            object <-  x
-            Names.Ktaxa<-object@Mi.names
-            index.Top.Ktaxa <- order(object@HRRG[,1],decreasing =FALSE)
-            Top.Ktaxa.GSplus<-data.frame(Mi.names=Names.Ktaxa, object@HRRG)
+            object =  x
+            Names.Ktaxa=object@Mi.names
+            index.Top.Ktaxa = order(object@HRRG[,1],decreasing =FALSE)
+            Top.Ktaxa.GSplus=data.frame(Mi.names=Names.Ktaxa, object@HRRG)
 
-            colnames(Top.Ktaxa.GSplus)<-c("Mi.names", "HR GS+", "LowerCI", "UpperCI", "p-value")
+            colnames(Top.Ktaxa.GSplus)=c("Mi.names", "HR GS+", "LowerCI", "UpperCI", "p-value")
             # FDR corrected CI for top k taxa
-            cilevel <- 1-0.05*5/nrow(object@HRRG)
+            cilevel = 1-0.05*5/nrow(object@HRRG)
 
-            HRpadj <- exp(log(object@HRRG[index.Top.Ktaxa,1]) + ((log(object@HRRG[index.Top.Ktaxa,c(2,3)])-log(object@HRRG[index.Top.Ktaxa,1]))*qnorm(cilevel)/1.96))  #
-            res.topKtaxa<-data.frame(Top.Ktaxa.GSplus,HRpadj)
+            HRpadj = exp(log(object@HRRG[index.Top.Ktaxa,1]) + ((log(object@HRRG[index.Top.Ktaxa,c(2,3)])-log(object@HRRG[index.Top.Ktaxa,1]))*qnorm(cilevel)/1.96))  #
+            res.topKtaxa=data.frame(Top.Ktaxa.GSplus,HRpadj)
 
-            colnames(res.topKtaxa)<-c("Mi.names","HR","LCI","UCI","p-value", "FDRLCI","FDRUCI")
+            colnames(res.topKtaxa)=c("Mi.names","HR","LCI","UCI","p-value", "FDRLCI","FDRUCI")
 
             x.axis= 1:length(object@Mi.names)
 

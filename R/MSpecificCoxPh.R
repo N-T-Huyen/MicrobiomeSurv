@@ -21,9 +21,41 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[survival]{coxph}},  \code{\link[MicrobiomeSurv]{EstimateHR}}
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+
+#' # Using the function
+#' Cox_taxon_fam_shan_w3 = MSpecificCoxPh(Survival = surv_fam_shan_w3$Survival,
+#'                                       Micro.mat = fam_shan_trim_w3,
+#'                                       Censor = surv_fam_shan_w3$Censor,
+#'                                       Reduce=TRUE,
+#'                                       Select=5,
+#'                                       Prognostic = prog_fam_shan_w3,
+#'                                       Mean = TRUE,
+#'                                       Method = "BH")
+#'
+#' # Results
+#' show(Cox_taxon_fam_shan_w3)
+#' summary(Cox_taxon_fam_shan_w3)
+#'}
+#'
 #' @export MSpecificCoxPh
 
-MSpecificCoxPh<-function(Survival,
+MSpecificCoxPh=function(Survival,
                          Micro.mat,
                          Censor,
                          Reduce=FALSE,
@@ -43,17 +75,17 @@ MSpecificCoxPh<-function(Survival,
 
   if (Reduce) {
     if (is.null(Prognostic)){
-      DataForReduction<-list(x=Micro.mat,y=Survival, censoring.status=Censor, mi.names=rownames(Micro.mat))
-      TentativeList<-names(sort(abs(superpc::superpc.train(DataForReduction, type="survival")$feature.scores),decreasing =TRUE))[1:Select]
+      DataForReduction=list(x=Micro.mat,y=Survival, censoring.status=Censor, mi.names=rownames(Micro.mat))
+      TentativeList=names(sort(abs(superpc::superpc.train(DataForReduction, type="survival")$feature.scores),decreasing =TRUE))[1:Select]
       TentativeList
 
-      ReduMicro.mat<-Micro.mat[TentativeList, ]
+      ReduMicro.mat=Micro.mat[TentativeList, ]
     }
 
     if (!is.null(Prognostic)){
       if (is.data.frame(Prognostic)) {
-        nPrgFac<-ncol(Prognostic)
-        NameProg<-colnames(Prognostic)
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
       }
 
       if (dim(Prognostic)[2] == 1){
@@ -64,7 +96,7 @@ MSpecificCoxPh<-function(Survival,
 
       for(i in 1 : n.mi.full){
         xi = Micro.mat[i, ]
-        datai <- data.frame(Survival, Censor, xi, Prognostic)
+        datai = data.frame(Survival, Censor, xi, Prognostic)
         modeli = eval(parse(text = paste("survival::coxph(survival::Surv(Survival, Censor) ~ xi", paste("+", NameProg[1:nPrgFac], sep="", collapse =""), ",data=datai)" , sep="" )))
         coef[i] = round(summary(modeli)$coefficients[1,1], 4)
         exp.coef[i] = round(summary(modeli)$coefficients[1,2], 4)
@@ -75,40 +107,40 @@ MSpecificCoxPh<-function(Survival,
       summary = cbind(coef, exp.coef, p.value.LRT, p.value)
       rownames(summary) = rownames(Micro.mat)
       colnames(summary) = c("coef", "exp.coef", "p.value.LRT", "p.value")
-      TentativeList<-names(sort(abs(summary[ ,"p.value.LRT"]),decreasing =TRUE))[1:Select]
+      TentativeList=names(sort(abs(summary[ ,"p.value.LRT"]),decreasing =TRUE))[1:Select]
       TentativeList
 
-      ReduMicro.mat <- Micro.mat[TentativeList, ]
+      ReduMicro.mat = Micro.mat[TentativeList, ]
       summary.reduced = summary[TentativeList, ]
     }
 
   } else {
-    ReduMicro.mat <- Micro.mat
+    ReduMicro.mat = Micro.mat
   }
 
 
-  n.mi<-nrow(ReduMicro.mat)
-  mi.name<-rownames(ReduMicro.mat)
+  n.mi=nrow(ReduMicro.mat)
+  mi.name=rownames(ReduMicro.mat)
 
-  HRp <- matrix(0, n.mi, 4)
-  gr <- matrix(0, n.mi, n.obs)
-  res <-  vector("list", n.mi)
+  HRp = matrix(0, n.mi, 4)
+  gr = matrix(0, n.mi, n.obs)
+  res =  vector("list", n.mi)
 
   for (i in 1:n.mi){  #---------------------------  STRAT FOR LOOP ------------------------
 
-    taxoni <- ReduMicro.mat[i,]
+    taxoni = ReduMicro.mat[i,]
 
     if (is.null(Prognostic)) {
 
-      cdata <- data.frame(Survival, Censor, taxoni)
-      m0 <- survival::coxph(survival::Surv(Survival, Censor==1) ~ taxoni, data=cdata)
+      cdata = data.frame(Survival, Censor, taxoni)
+      m0 = survival::coxph(survival::Surv(Survival, Censor==1) ~ taxoni, data=cdata)
     }
     if (!is.null(Prognostic)) {
       if (is.data.frame(Prognostic)) {
-        nPrgFac<-ncol(Prognostic)
-        cdata <- data.frame(Survival,Censor,taxoni,Prognostic)
-        NameProg<-colnames(Prognostic)
-        eval(parse(text=paste( "m0 <-survival::coxph(survival::Surv(Survival, Censor==1) ~ taxoni",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+        nPrgFac=ncol(Prognostic)
+        cdata = data.frame(Survival,Censor,taxoni,Prognostic)
+        NameProg=colnames(Prognostic)
+        eval(parse(text=paste( "m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ taxoni",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
       } else {
 
         stop(" Argument 'Prognostic' is NOT a data frame ")
@@ -116,15 +148,15 @@ MSpecificCoxPh<-function(Survival,
 
     }
     #risk Score
-    beta1 <- summary(m0)[[7]][c("taxoni"), 1]
-    p1 <- beta1*taxoni
+    beta1 = summary(m0)[[7]][c("taxoni"), 1]
+    p1 = beta1*taxoni
 
-    Temptaxoni <- EstimateHR(Risk.Scores = p1, Data.Survival =cdata, Prognostic=Prognostic,
+    Temptaxoni = EstimateHR(Risk.Scores = p1, Data.Survival =cdata, Prognostic=Prognostic,
                              Plots = FALSE, Mean = TRUE, Quantile = Quantile )
-    res[[i]]<- Temptaxoni$SurvResult
-    HRp[i, c(1, 2, 3)]<- summary(Temptaxoni$SurvResult)[[8]][1,c(1,3,4)]
-    HRp[i, 4] <- summary(Temptaxoni$SurvResult)[[7]][1,5]
-    gr[i,]<- Temptaxoni$Riskgroup
+    res[[i]]= Temptaxoni$SurvResult
+    HRp[i, c(1, 2, 3)]= summary(Temptaxoni$SurvResult)[[8]][1,c(1,3,4)]
+    HRp[i, 4] = summary(Temptaxoni$SurvResult)[[7]][1,5]
+    gr[i,]= Temptaxoni$Riskgroup
 
 
   }#---------------------------  END OF  FOR LOOP ------------------------

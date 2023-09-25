@@ -54,22 +54,22 @@ setMethod("summary",signature="cvsit", function(object){
   cat("Results Based on Test Data\n")
   cat("Summary of Cross Validated Top K Taxa  Analysis\n")
   cat("Estimated Median of the HR for the cross Validated HR for Top K Taxa \n")
-  nn<-dim(object@HRpca)[3]
-  mean.alpha<- sapply(1:nn,function(i) median(object@HRpca[,1,i],na.rm=T))
-  se.alphal<- sapply(1:nn,function(i) quantile(object@HRpca[,1,i],na.rm=T,probs = c(0.025)))
-  se.alphau<- sapply(1:nn,function(i) quantile(object@HRpca[,1,i],na.rm=T,probs = c(0.975)))
-  mx1<-paste(round(mean.alpha,3),"(",round(se.alphal,3),"-",round(se.alphau,3),")",sep="")
+  nn=dim(object@HRpca)[3]
+  mean.alpha= sapply(1:nn,function(i) median(object@HRpca[,1,i],na.rm=T))
+  se.alphal= sapply(1:nn,function(i) quantile(object@HRpca[,1,i],na.rm=T,probs = c(0.025)))
+  se.alphau= sapply(1:nn,function(i) quantile(object@HRpca[,1,i],na.rm=T,probs = c(0.975)))
+  mx1=paste(round(mean.alpha,3),"(",round(se.alphal,3),"-",round(se.alphau,3),")",sep="")
 
 
-  mean.alpha<- sapply(1:nn,function(i) median(object@HRpls[,1,i],na.rm=T))
-  se.alphal<- sapply(1:nn,function(i) quantile(object@HRpls[,1,i],na.rm=T,probs = c(0.025)))
-  se.alphau<- sapply(1:nn,function(i) quantile(object@HRpls[,1,i],na.rm=T,probs = c(0.975)))
-  mx3<-paste(round(mean.alpha,3),"(",round(se.alphal,3),"-",round(se.alphau,3),")",sep="")
+  mean.alpha= sapply(1:nn,function(i) median(object@HRpls[,1,i],na.rm=T))
+  se.alphal= sapply(1:nn,function(i) quantile(object@HRpls[,1,i],na.rm=T,probs = c(0.025)))
+  se.alphau= sapply(1:nn,function(i) quantile(object@HRpls[,1,i],na.rm=T,probs = c(0.975)))
+  mx3=paste(round(mean.alpha,3),"(",round(se.alphal,3),"-",round(se.alphau,3),")",sep="")
 
 
-  HR<-data.frame(rbind(mx1,mx3))
-  colnames(HR)<-object@Top
-  rownames(HR)<-c("(PCA)","(PLS)")
+  HR=data.frame(rbind(mx1,mx3))
+  colnames(HR)=object@Top
+  rownames(HR)=c("(PCA)","(PLS)")
   print(HR)
 }
 )
@@ -87,38 +87,38 @@ setMethod("plot", signature(x="cvsit", y="missing"),
           function(x,  y, type=1, ...) {
             if (class(x)!="cvsit") stop("Invalid class object")
             if (type==1) {
-            nn<-dim(x@HRpca)[3]
-            PC.HRp<-x@HRpca[,1,1:nn]
-            colnames(PC.HRp)<-x@Top
+            nn=dim(x@HRpca)[3]
+            PC.HRp=x@HRpca[,1,1:nn]
+            colnames(PC.HRp)=x@Top
 
-            dotsCall <- substitute(list(...))
-            ll <- eval(dotsCall)
-            if(!hasArg("xlab")) ll$xlab <- "Top K Taxa"
-            if(!hasArg("ylab")) ll$ylab <- "Cross Validated HR"
-            ll$main <- "Estimated HR on Test Data \n for Top K Taxa (PCA)"
-            if(!hasArg("cex.lab")) ll$cex.lab <- 1.2
-            if(!hasArg("cex.main")) ll$cex.main <- 1.3
-            if(!hasArg("col")) ll$col <- 1:nn+1
-            if(!hasArg("ylim")) ll$ylim <- c(0, 5) #max(PC.HRp)
-            ll$x<-PC.HRp
+            dotsCall = substitute(list(...))
+            ll = eval(dotsCall)
+            if(!hasArg("xlab")) ll$xlab = "Top K Taxa"
+            if(!hasArg("ylab")) ll$ylab = "Cross Validated HR"
+            ll$main = "Estimated HR on Test Data \n for Top K Taxa (PCA)"
+            if(!hasArg("cex.lab")) ll$cex.lab = 1.2
+            if(!hasArg("cex.main")) ll$cex.main = 1.3
+            if(!hasArg("col")) ll$col = 1:nn+1
+            if(!hasArg("ylim")) ll$ylim = c(0, 5) #max(PC.HRp)
+            ll$x=PC.HRp
             do.call(boxplot,args=ll)
             }
 
             if (type==2) {
-            nn<-dim(x@HRpca)[3]
-            PL.HRp<-x@HRpls[,1,1:nn]
-            colnames(PL.HRp)<-x@Top
+            nn=dim(x@HRpca)[3]
+            PL.HRp=x@HRpls[,1,1:nn]
+            colnames(PL.HRp)=x@Top
 
-            dotsCall <- substitute(list(...))
-            lll <- eval(dotsCall)
-            if(!hasArg("xlab")) lll$xlab <- "Top K Taxa"
-            if(!hasArg("ylab")) lll$ylab <- "Cross Validated HR"
-            lll$main <- "Estimated HR Test Data \n for Top K Taxa (PLS)"
-            if(!hasArg("cex.lab")) lll$cex.lab <- 1.2
-            if(!hasArg("cex.main")) lll$cex.main <- 1.3
-            if(!hasArg("col")) lll$col <- 1:nn+1
-            if(!hasArg("ylim")) lll$ylim <- c(0,5) #max(PL.HRp)
-            lll$x<-PL.HRp
+            dotsCall = substitute(list(...))
+            lll = eval(dotsCall)
+            if(!hasArg("xlab")) lll$xlab = "Top K Taxa"
+            if(!hasArg("ylab")) lll$ylab = "Cross Validated HR"
+            lll$main = "Estimated HR Test Data \n for Top K Taxa (PLS)"
+            if(!hasArg("cex.lab")) lll$cex.lab = 1.2
+            if(!hasArg("cex.main")) lll$cex.main = 1.3
+            if(!hasArg("col")) lll$col = 1:nn+1
+            if(!hasArg("ylim")) lll$ylim = c(0,5) #max(PL.HRp)
+            lll$x=PL.HRp
             do.call(boxplot,args=lll)
             return(invisible())
           }

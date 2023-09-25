@@ -33,7 +33,46 @@
 #' @author Ziv Shkedy
 #' @seealso \code{\link[survival]{coxph}},
 #' \code{\link[Microbiome]{EstimateHR}}, \code{\link[glmnet]{glmnet}}, \code{\link[Microbiome]{Lasoelacox}}
-
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+#'
+#' # Using the function
+#' CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = survival_data_w3$Survival,
+#'                                      Censor = survival_data_w3$Censor,
+#'                                      Micro.mat = fam_shan_trim_w3,
+#'                                      Prognostic = prog_fam_w3,
+#'                                      Standardize = TRUE,
+#'                                      Alpha = 1,
+#'                                      Fold = 4,
+#'                                      Ncv = 100,
+#'                                      nlambda = 100)
+#'
+#' # Number of selected taxa per CV
+#' CV_lasso_fam_shan_w3@n
+#'
+#' # Get the matrix of coefficients
+#' Results@Coef.mat
+#'
+#' # Survival information of the train dataset
+#' Results@HRTrain
+#'
+#' # Survival information of the test dataset
+#' Results@HRTest
+#' }
 #' @export CVLasoelascox
 #' @import superpc
 #' @import stats
@@ -41,7 +80,7 @@
 #' @import grDevices
 #' @import graphics
 
-CVLasoelascox <- function(Survival,
+CVLasoelascox = function(Survival,
                           Censor,
                           Micro.mat,
                           Prognostic,
@@ -59,55 +98,55 @@ CVLasoelascox <- function(Survival,
 
 
 
-  mi.names <- rownames(Micro.mat)
+  mi.names = rownames(Micro.mat)
 
-  n.mi <- nrow(Micro.mat)
-  n.patients <- ncol(Micro.mat)
-  n.train <- (n.patients-floor(n.patients/Fold))
-  n.test <- floor(n.patients/Fold)
-  cv.train <- matrix(0,Ncv,n.train)
-  cv.test  <- matrix(0,Ncv,n.test)
-  n.mi <- rep(0, Ncv)
+  n.mi = nrow(Micro.mat)
+  n.patients = ncol(Micro.mat)
+  n.train = (n.patients-floor(n.patients/Fold))
+  n.test = floor(n.patients/Fold)
+  cv.train = matrix(0,Ncv,n.train)
+  cv.test  = matrix(0,Ncv,n.test)
+  n.mi = rep(0, Ncv)
 
   #optimum lambda
-  lambda <- rep(NA, Ncv)
-  pld <- rep(NA, Ncv) # partial likelihood deviance
+  lambda = rep(NA, Ncv)
+  pld = rep(NA, Ncv) # partial likelihood deviance
 
   #HR--------
-  HRTrain <- matrix(NA,nrow=Ncv,ncol=3)
-  HRTest <- matrix(NA,nrow=Ncv,ncol=3)
+  HRTrain = matrix(NA,nrow=Ncv,ncol=3)
+  HRTest = matrix(NA,nrow=Ncv,ncol=3)
 
 
 
   if(is.null(Prognostic)){
-    Data <- Micro.mat
-    Data.Full <- t(Micro.mat)
-    Penalty <- rep(1,row(Data.Full))
+    Data = Micro.mat
+    Data.Full = t(Micro.mat)
+    Penalty = rep(1,row(Data.Full))
   } else{
-    Data <- t(Micro.mat)
-    Data.Full <- cbind(Data,Prognostic)
-    Penalty <- c(rep(1,ncol(Data)),rep(0,ncol(Prognostic)))
+    Data = t(Micro.mat)
+    Data.Full = cbind(Data,Prognostic)
+    Penalty = c(rep(1,ncol(Data)),rep(0,ncol(Prognostic)))
   }
 
   # Survival times must be larger than 0
-  #Survival[Survival <= 0] <- stats::quantile(Survival, probs = 0.01)
-  perPrognostic<-NULL
-  coef.mat <- mi.mat <- matrix(0,nrow=Ncv,ncol=nrow(Micro.mat))
+  #Survival[Survival <= 0] = stats::quantile(Survival, probs = 0.01)
+  perPrognostic=NULL
+  coef.mat = mi.mat = matrix(0,nrow=Ncv,ncol=nrow(Micro.mat))
 
-  pIndex <- c(1:n.patients)
+  pIndex = c(1:n.patients)
 
   for (i in 1:Ncv){
     #set.seed(i)
     message('Cross validation loop ',i)
 
-    cv.train[i,] <- sort(sample(pIndex,n.train,replace=F) )
-    cv.test[i,] <- c(1:n.patients)[-c(intersect(cv.train[i,] ,c(1:n.patients)))]
+    cv.train[i,] = sort(sample(pIndex,n.train,replace=F) )
+    cv.test[i,] = c(1:n.patients)[-c(intersect(cv.train[i,] ,c(1:n.patients)))]
 
     Stime=Survival[cv.train[i,]]
     sen= Censor[cv.train[i,]]
-    Data.Full2 <-Data.Full[cv.train[i,],]
+    Data.Full2 =Data.Full[cv.train[i,],]
 
-    Lasso.Cox.CV <- cv.glmnet(x = data.matrix(Data.Full2),
+    Lasso.Cox.CV = cv.glmnet(x = data.matrix(Data.Full2),
                               y = survival::Surv(as.vector(Stime),as.vector(sen) == 1),
                               family = 'cox',
                               alpha = Alpha,
@@ -118,82 +157,82 @@ CVLasoelascox <- function(Survival,
 
     # Results of the cv.glmnet procedure
 
-    Lambda <- Lasso.Cox.CV$lambda.min
-    Alllamda <- Lasso.Cox.CV$lambda
-    Coefficients <- coef(Lasso.Cox.CV, s = Lambda)
-    Coefficients.NonZero <- Coefficients[Coefficients[, 1] != 0, ]
+    Lambda = Lasso.Cox.CV$lambda.min
+    Alllamda = Lasso.Cox.CV$lambda
+    Coefficients = coef(Lasso.Cox.CV, s = Lambda)
+    Coefficients.NonZero = Coefficients[Coefficients[, 1] != 0, ]
 
 
-    pld[i]<-Lasso.Cox.CV$cvm[Lasso.Cox.CV$lambda==Lasso.Cox.CV$lambda.min]  # partial likelihood deviance
+    pld[i]=Lasso.Cox.CV$cvm[Lasso.Cox.CV$lambda==Lasso.Cox.CV$lambda.min]  # partial likelihood deviance
 
     if (is.null(Prognostic)){
-      Selected.mi <- names(Coefficients.NonZero)
+      Selected.mi = names(Coefficients.NonZero)
     }else{
-      Selected.mi <- setdiff(names(Coefficients.NonZero), colnames(Prognostic))
+      Selected.mi = setdiff(names(Coefficients.NonZero), colnames(Prognostic))
     }
 
-    n.mi[i] <- length(Selected.mi)
+    n.mi[i] = length(Selected.mi)
 
     # What to do if no taxa is selected?
     # Decrease lambda until a taxon is selected
     # Going through the list of lambda values and repeat the above procedure
 
-    Lambda <- Lasso.Cox.CV$lambda.min
-    Lambda.Sequence <- Lasso.Cox.CV$lambda
-    Lambda.Index <- which(Lambda.Sequence == Lasso.Cox.CV$lambda.min)
+    Lambda = Lasso.Cox.CV$lambda.min
+    Lambda.Sequence = Lasso.Cox.CV$lambda
+    Lambda.Index = which(Lambda.Sequence == Lasso.Cox.CV$lambda.min)
 
     Lambda.Index.Add = 0
 
     while (n.mi[i] == 0) {
-      Lambda.Index.Add <- Lambda.Index.Add + 1
-      Coefficients <- coef(Lasso.Cox.CV, s = Lambda.Sequence[Lambda.Index + Lambda.Index.Add])
-      Coefficients.NonZero <- Coefficients[Coefficients[, 1] != 0,]
+      Lambda.Index.Add = Lambda.Index.Add + 1
+      Coefficients = coef(Lasso.Cox.CV, s = Lambda.Sequence[Lambda.Index + Lambda.Index.Add])
+      Coefficients.NonZero = Coefficients[Coefficients[, 1] != 0,]
 
       if (is.null(Prognostic))
       {
-        Selected.mi <- names(Coefficients.NonZero)
+        Selected.mi = names(Coefficients.NonZero)
       }
       else
       {
-        Selected.mi <- setdiff(names(Coefficients.NonZero), colnames(Prognostic))
+        Selected.mi = setdiff(names(Coefficients.NonZero), colnames(Prognostic))
       }
 
-      Lambda <- Lambda.Sequence[Lambda.Index + Lambda.Index.Add]
-      n.mi[i] <- length(Selected.mi)
+      Lambda = Lambda.Sequence[Lambda.Index + Lambda.Index.Add]
+      n.mi[i] = length(Selected.mi)
       if (Lambda.Index.Add == length(Lambda.Sequence) & is.null(Selected.mi) == TRUE) stop("No taxa are selected")
     }
 
-    lambda[i]<-Lambda
-    mi.mat[i, is.element(rownames(Micro.mat),Selected.mi)] <- 1
-    coef.mat[i,is.element(rownames(Micro.mat),Selected.mi)] <- Coefficients.NonZero[Selected.mi]
+    lambda[i]=Lambda
+    mi.mat[i, is.element(rownames(Micro.mat),Selected.mi)] = 1
+    coef.mat[i,is.element(rownames(Micro.mat),Selected.mi)] = Coefficients.NonZero[Selected.mi]
 
-    scores.train <- as.vector(Coefficients.NonZero[Selected.mi] %*% t(Data[cv.train[i,], Selected.mi]))
-    scores.test <- as.vector(Coefficients.NonZero[Selected.mi] %*% t(Data[cv.test[i,],Selected.mi]))
+    scores.train = as.vector(Coefficients.NonZero[Selected.mi] %*% t(Data[cv.train[i,], Selected.mi]))
+    scores.test = as.vector(Coefficients.NonZero[Selected.mi] %*% t(Data[cv.test[i,],Selected.mi]))
 
 
     #######################
     ## train set ###########
-    Sdata<-data.frame(Survival=Survival[cv.train[i,]],Censor=Censor[cv.train[i,]])
+    Sdata=data.frame(Survival=Survival[cv.train[i,]],Censor=Censor[cv.train[i,]])
 
-    if (!is.null(Prognostic)) {perPrognostic<-as.data.frame(Prognostic[cv.train[i,],])}
-    colnames(perPrognostic) <- colnames(Prognostic)
+    if (!is.null(Prognostic)) {perPrognostic=as.data.frame(Prognostic[cv.train[i,],])}
+    colnames(perPrognostic) = colnames(Prognostic)
 
-    Results1<-EstimateHR(Risk.Scores=scores.train, Data.Survival =Sdata, Prognostic = perPrognostic, Plots = FALSE, Mean = TRUE, Quantile = Quantile)
+    Results1=EstimateHR(Risk.Scores=scores.train, Data.Survival =Sdata, Prognostic = perPrognostic, Plots = FALSE, Mean = TRUE, Quantile = Quantile)
 
-    if (!is.null(Prognostic)) HRTrain[i,]<-(summary(Results1$SurvResult)[[8]])[1,][-2]
-    if ( is.null(Prognostic)) HRTrain[i,]<- summary(Results1$SurvResult)[[8]][-2]
+    if (!is.null(Prognostic)) HRTrain[i,]=(summary(Results1$SurvResult)[[8]])[1,][-2]
+    if ( is.null(Prognostic)) HRTrain[i,]= summary(Results1$SurvResult)[[8]][-2]
 
     #######################
     ## test set ###########
-    Sdata<-data.frame(Survival=Survival[cv.test[i,]],Censor=Censor[cv.test[i,]])
+    Sdata=data.frame(Survival=Survival[cv.test[i,]],Censor=Censor[cv.test[i,]])
 
-    if (!is.null(Prognostic)) {perPrognostic<-as.data.frame(Prognostic[cv.test[i,],])}
-    colnames(perPrognostic) <- colnames(Prognostic)
+    if (!is.null(Prognostic)) {perPrognostic=as.data.frame(Prognostic[cv.test[i,],])}
+    colnames(perPrognostic) = colnames(Prognostic)
 
-    Results2<-EstimateHR(Risk.Scores =scores.test, Data.Survival = Sdata, Prognostic = perPrognostic, Plots = FALSE, Mean = TRUE, Quantile = Quantile)
+    Results2=EstimateHR(Risk.Scores =scores.test, Data.Survival = Sdata, Prognostic = perPrognostic, Plots = FALSE, Mean = TRUE, Quantile = Quantile)
 
-    if (!is.null(Prognostic)) HRTest[i,]<-(summary(Results2$SurvResult)[[8]])[1,][-2]
-    if ( is.null(Prognostic)) HRTest[i,]<- summary(Results2$SurvResult)[[8]][-2]
+    if (!is.null(Prognostic)) HRTest[i,]=(summary(Results2$SurvResult)[[8]])[1,][-2]
+    if ( is.null(Prognostic)) HRTest[i,]= summary(Results2$SurvResult)[[8]][-2]
   }
 
 

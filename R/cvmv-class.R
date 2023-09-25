@@ -68,24 +68,24 @@ setMethod("summary",signature="cvmv", function(object){
 setMethod("plot", signature(x="cvmv"),
           function(x,  y, ...) {
             if (class(x)!="cvmv") stop("Invalid class object")
-            HRTest<-x@HRTest
-            HRTrain<-x@HRTrain
-            nCV<-x@Ncv
-            dotsCall <- substitute(list(...))
-            ll <- eval(dotsCall)
-            if(!hasArg("xlab")) ll$xlab <- "MCCV index"
-            if(!hasArg("ylab")) ll$ylab <- "HR estimate"
-            ll$main <- "Estimated HR on Test Set \n for Low risk group"
-            if(!hasArg("cex.lab")) ll$cex.lab <- 1.5
-            if(!hasArg("cex.main")) ll$cex.main <- 1
-            if(!hasArg("col")) ll$col <- 2
+            HRTest=x@HRTest
+            HRTrain=x@HRTrain
+            nCV=x@Ncv
+            dotsCall = substitute(list(...))
+            ll = eval(dotsCall)
+            if(!hasArg("xlab")) ll$xlab = "MCCV index"
+            if(!hasArg("ylab")) ll$ylab = "HR estimate"
+            ll$main = "Estimated HR on Test Set \n for Low risk group"
+            if(!hasArg("cex.lab")) ll$cex.lab = 1.5
+            if(!hasArg("cex.main")) ll$cex.main = 1
+            if(!hasArg("col")) ll$col = 2
 
-            ll$x<-HRTest[,1]
-            if(!hasArg("ylim")) ll$ylim <- c(0,2) #max(x@HRTrain,x@HRTest)
+            ll$x=HRTest[,1]
+            if(!hasArg("ylim")) ll$ylim = c(0,2) #max(x@HRTrain,x@HRTest)
 
 
             par(mfrow=c(1,2))
-            t1 <- which(HRTest[,1]<1)
+            t1 = which(HRTest[,1]<1)
             do.call(plot,args=ll)
             #plot(HRp.test[,1],ylim=c(0,2),ylab="HR",main="")
             for(i in 1:nCV){
@@ -97,14 +97,14 @@ setMethod("plot", signature(x="cvmv"),
             abline(h=1)
 
 
-            Results<-data.frame(HRTrain=HRTrain[,1],HRTest=as.numeric(HRTest[,1]))
-            ll$x<-Results
-            ll$names<-c("Training ","Test ")
-            ll$main <- "Estimated HR on Training and Test Set \n for Low risk group"
-            if(!hasArg("xlab")) ll$xlab <- ""
-            if(!hasArg("ylab")) ll$ylab <- "HR estimate"
-            if(!hasArg("cex.lab")) ll$cex.lab <- 1.5
-            if(!hasArg("cex.main")) ll$cex.main <- 1
-            if(!hasArg("col")) ll$col <- 2:3
+            Results=data.frame(HRTrain=HRTrain[,1],HRTest=as.numeric(HRTest[,1]))
+            ll$x=Results
+            ll$names=c("Training ","Test ")
+            ll$main = "Estimated HR on Training and Test Set \n for Low risk group"
+            if(!hasArg("xlab")) ll$xlab = ""
+            if(!hasArg("ylab")) ll$ylab = "HR estimate"
+            if(!hasArg("cex.lab")) ll$cex.lab = 1.5
+            if(!hasArg("cex.main")) ll$cex.main = 1
+            if(!hasArg("col")) ll$col = 2:3
             do.call(boxplot,args=ll)
           })

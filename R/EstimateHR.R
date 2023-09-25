@@ -24,10 +24,44 @@
 #' @seealso \code{\link[survival]{coxph}},
 #' \code{\link[MicrobiomeSurv]{EstimateHR}},
 #' \code{\link[MicrobiomeSurv]{Lasoelacox}}
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
+#' # Obtaning the risk score and data survival
+#' lasso_fam_shan_w3 = Lasoelascox(Survival = survival_data_w3$Survival,
+#'                                 Censor = survival_data_w3$Censor,
+#'                                 Micro.mat = fam_shan_trim_w3,
+#'                                 Prognostic = prog_fam_shan_w3,
+#'                                 Plots = TRUE,
+#'                                 Standardize = TRUE,
+#'                                 Alpha = 1,
+#'                                 Fold = 4,
+#'                                 nlambda = 100,
+#'                                 Mean = TRUE)
+#'
+#' # Using the function
+#' est_HR_fam_shan_w3 = EstimateHR(Risk.Scores = lasso_fam_shan_w3$Risk.Scores,
+#'                                 Data.Survival = lasso_fam_shan_w3$Data.Survival,
+#'                                 Prognostic = prog_fam_shan_w3, Plots = TRUE,
+#'                                 Mean = TRUE)
+#' }
 #' @export EstimateHR
 
-EstimateHR <- function(Risk.Scores, Data.Survival,
+EstimateHR = function(Risk.Scores, Data.Survival,
                      Prognostic = NULL, Plots = FALSE,
                      Mean = TRUE, Quantile = 0.50)
 {
@@ -36,21 +70,21 @@ EstimateHR <- function(Risk.Scores, Data.Survival,
   if (missing(Data.Survival)) stop('Surival data are missing!')
   if (missing(Risk.Scores)) stop('Risk scores are missing!')
 
-  Survival <- Data.Survival[ ,1]
-  Censor   <- Data.Survival[ ,2]
+  Survival = Data.Survival[ ,1]
+  Censor   = Data.Survival[ ,2]
 
-  n.Patients <- length(Risk.Scores)
+  n.Patients = length(Risk.Scores)
 
 
   # Group by high risk or low risk
   # Based on cut-off value
   if(Mean){
-    Cut <- mean(Risk.Scores)
+    Cut = mean(Risk.Scores)
   } else{
-    Cut <- stats::quantile(Risk.Scores, Quantile, type=6)
+    Cut = stats::quantile(Risk.Scores, Quantile, type=6)
   }
 
-  Risk.Group <- ifelse(Risk.Scores >= Cut,'High risk', 'Low risk')
+  Risk.Group = ifelse(Risk.Scores >= Cut,'High risk', 'Low risk')
 
   # Make a data frame
 
@@ -63,9 +97,9 @@ EstimateHR <- function(Risk.Scores, Data.Survival,
   if (Plots)
   {
     # Kaplan Meier plot
-    Data.KM <- data.frame(Survival=Survival,Censor=Censor,Risk.Group=Risk.Group)
-    KM  <- survfit(Surv(Survival,Censor==1)~ Risk.Group,data=Data.KM)
-    KMplot <- ggsurvplot(fit=KM, surv.scale ='percent', risk.table=FALSE,
+    Data.KM = data.frame(Survival=Survival,Censor=Censor,Risk.Group=Risk.Group)
+    KM  = survfit(Surv(Survival,Censor==1)~ Risk.Group,data=Data.KM)
+    KMplot = ggsurvplot(fit=KM, surv.scale ='percent', risk.table=FALSE,
                          pval = TRUE,
                          ggtheme = ggplot2::theme_classic(),
                          palette='Dark2',conf.int=TRUE,legend='right',
@@ -74,9 +108,9 @@ EstimateHR <- function(Risk.Scores, Data.Survival,
     KMplot
 
     # Boxplot
-    Data.Boxplot <- data.frame(Survival=Survival,Risk.Group=Risk.Group)
-    Data.Boxplot$Risk.Group <- factor(Data.Boxplot$Risk.Group, levels=c('Low risk','High risk'))
-    SurvBPlot <- ggplot(Data.Boxplot, aes(y = Survival,x = Risk.Group)) +
+    Data.Boxplot = data.frame(Survival=Survival,Risk.Group=Risk.Group)
+    Data.Boxplot$Risk.Group = factor(Data.Boxplot$Risk.Group, levels=c('Low risk','High risk'))
+    SurvBPlot = ggplot(Data.Boxplot, aes(y = Survival,x = Risk.Group)) +
                         geom_boxplot(aes(fill = Risk.Group),width=0.4) +
                         ggtitle('Low risk vs high risk')+
                         ylab(expression('Survival time ')) +
@@ -94,15 +128,15 @@ EstimateHR <- function(Risk.Scores, Data.Survival,
 
   if (is.null(Prognostic))
   {
-    Cox.Fit.Risk.Group <- coxph(Surv(Survival, Censor==1) ~ Risk.Group, data = Data.Risk.Group)
+    Cox.Fit.Risk.Group = coxph(Surv(Survival, Censor==1) ~ Risk.Group, data = Data.Risk.Group)
   }
 
   if (is.data.frame(Prognostic))
   {
-    Number.Prognostic <- ncol(Prognostic)
-    Data.Risk.Group <- data.frame(Data.Risk.Group,Prognostic)
-    Names.Prognostic<-colnames(Prognostic)
-    eval(parse(text=paste('Cox.Fit.Risk.Group <- coxph(survival::Surv(Survival, Censor==1) ~ Risk.Group', paste('+',Names.Prognostic[1:Number.Prognostic],sep='',collapse =''),',data=Data.Risk.Group)' ,sep='')))
+    Number.Prognostic = ncol(Prognostic)
+    Data.Risk.Group = data.frame(Data.Risk.Group,Prognostic)
+    Names.Prognostic=colnames(Prognostic)
+    eval(parse(text=paste('Cox.Fit.Risk.Group = coxph(survival::Surv(Survival, Censor==1) ~ Risk.Group', paste('+',Names.Prognostic[1:Number.Prognostic],sep='',collapse =''),',data=Data.Risk.Group)' ,sep='')))
   }
 
   if (Plots){

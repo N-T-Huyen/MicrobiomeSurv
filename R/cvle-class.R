@@ -25,7 +25,7 @@
 #' @docType class
 
 setClass("cvle", representation(Coef.mat="matrix", lambda="vector", n="vector", mi.mat="matrix",
-                                HRTrain="matrix", HRTest="matrix", pld="vector", Micro.mat="matrix"), 
+                                HRTrain="matrix", HRTest="matrix", pld="vector", Micro.mat="matrix"),
                  prototype=list(Coef.mat=matrix(1,1,1), lambda=c(NA), n=c(NA), mi.mat=matrix(1,1,1),
                                 HRTrain=matrix(1,1,1), HRTest=matrix(1,1,1), pld=c(NA), Micro.mat=matrix(1,1,1))
 )
@@ -66,11 +66,11 @@ setMethod("summary", signature ="cvle"
             print(quantile(object@HRTrain[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
             cat("Mostly selected 5 taxa:\n")
             Freq=colSums(object@mi.mat)
-            names(Freq)<-rownames(object@Micro.mat)
-            sFreq<-sort(Freq, decreasing = TRUE)
-            sFreq<-sFreq[sFreq>0]
-            maxG<-length(sFreq)
-            if (maxG>5) maxG<-5
+            names(Freq)=rownames(object@Micro.mat)
+            sFreq=sort(Freq, decreasing = TRUE)
+            sFreq=sFreq[sFreq>0]
+            maxG=length(sFreq)
+            if (maxG>5) maxG=5
 print(names(sFreq)[1:maxG])
           })
 
@@ -89,18 +89,18 @@ print(names(sFreq)[1:maxG])
                       if (class(x)!="cvle") stop("Invalid class object")
                       if (type==1) {
 
-                        DistHR<-data.frame(HRTrain=x@HRTrain[,1],HRTest=x@HRTest[,1])
+                        DistHR=data.frame(HRTrain=x@HRTrain[,1],HRTest=x@HRTest[,1])
 
-                        colnames(DistHR)<-c("Training","Test")
-                        dotsCall <- substitute(list(...))
-                        ll <- eval(dotsCall)
-                        if(!hasArg("xlab")) ll$xlab <- ""
-                        if(!hasArg("ylab")) ll$ylab <- "HR estimate"
-                        ll$main <- "Distribution of HR on Training and Test Set \n for Low risk group"
-                        if(!hasArg("cex.lab")) ll$cex.lab <- 1.5
-                        if(!hasArg("cex.main")) ll$cex.main <- 1
-                        if(!hasArg("col")) ll$col <- 2:3
-                        ll$x<-DistHR
+                        colnames(DistHR)=c("Training","Test")
+                        dotsCall = substitute(list(...))
+                        ll = eval(dotsCall)
+                        if(!hasArg("xlab")) ll$xlab = ""
+                        if(!hasArg("ylab")) ll$ylab = "HR estimate"
+                        ll$main = "Distribution of HR on Training and Test Set \n for Low risk group"
+                        if(!hasArg("cex.lab")) ll$cex.lab = 1.5
+                        if(!hasArg("cex.main")) ll$cex.main = 1
+                        if(!hasArg("col")) ll$col = 2:3
+                        ll$x=DistHR
                         do.call(boxplot,args=ll)
 
                       }
@@ -109,16 +109,16 @@ print(names(sFreq)[1:maxG])
                       if (type==2) {
 
                         HRTest=x@HRTest[,1]
-                        dotsCall <- substitute(list(...))
-                        ll <- eval(dotsCall)
-                        if(!hasArg("xlab")) ll$xlab <- "Estimated HR on Test Data"
-                        if(!hasArg("ylab")) ll$ylab <- "Number of non zero coef."
-                        ll$main <- "HR vs number of taxa"
-                        if(!hasArg("cex.lab")) ll$cex.lab <- 0.8
-                        if(!hasArg("cex.main")) ll$cex.main <- 1
-                        if(!hasArg("col")) ll$col <- 2
-                        ll$x<-HRTest
-                        ll$y<-x@n
+                        dotsCall = substitute(list(...))
+                        ll = eval(dotsCall)
+                        if(!hasArg("xlab")) ll$xlab = "Estimated HR on Test Data"
+                        if(!hasArg("ylab")) ll$ylab = "Number of non zero coef."
+                        ll$main = "HR vs number of taxa"
+                        if(!hasArg("cex.lab")) ll$cex.lab = 0.8
+                        if(!hasArg("cex.main")) ll$cex.main = 1
+                        if(!hasArg("col")) ll$col = 2
+                        ll$x=HRTest
+                        ll$y=x@n
                         do.call(plot,args=ll)
 
                       }

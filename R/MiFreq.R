@@ -14,28 +14,60 @@
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{cvmm}}, \code{\link[survival]{coxph}},
 #' \code{\link[MicrobiomeSurv]{EstimateHR}},\code{\link[MicrobiomeSurv]{CVLasoelacox}}
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+
+#' # Cross-Validation for LASSO and ELASTIC-NET
+#' CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = survival_data_w3$Survival,
+#'                                      Censor = survival_data_w3$Censor,
+#'                                      Micro.mat = fam_shan_trim_w3,
+#'                                      Prognostic = prog_fam_w3,
+#'                                      Standardize = TRUE,
+#'                                      Alpha = 1,
+#'                                      Fold = 4,
+#'                                      Ncv = 100,
+#'                                      nlambda = 100)
+#'
+#'
+#' # Using the function
+#' MiFreq_fam_shan_w3 = MiFreq(Object = CV_lasso_fam_shan_w3, TopK=5)
+#' }
 #' @export MiFreq
 
-MiFreq<-function(Object,
+MiFreq=function(Object,
                  TopK=20){
 
   #Decrease=FALSE
   if (class(Object)!="cvle") stop("Invalid object class.")
 
-  MFreq <- Object@mi.mat
-  fr<-colSums(MFreq)
-  names(fr)<-rownames(Object@Micro.mat)
+  MFreq = Object@mi.mat
+  fr=colSums(MFreq)
+  names(fr)=rownames(Object@Micro.mat)
 
   if(!is.null(TopK)){
-    top <- sort(fr,decreasing=TRUE)
-    topn <- top[1:TopK]
+    top = sort(fr,decreasing=TRUE)
+    topn = top[1:TopK]
     barplot(topn,las=2,col=rainbow(length(topn)), ylim = c(0,max(topn) + 1),  ylab="",cex.names=0.6,main=paste( "Top ", TopK, " most selected taxa ",sep=""),cex.lab=1,cex.main=1.5  )
     return(top)
   } else
   {
-    #top.fr<-fr[fr==N]
-    top.fr <- sort(fr,decreasing=TRUE)
-    topnn <- top.fr[1:TopK]
+    #top.fr=fr[fr==N]
+    top.fr = sort(fr,decreasing=TRUE)
+    topnn = top.fr[1:TopK]
     barplot(top.fr,las=2,col=rainbow(length(topnn)), ylim = c(0,max(topnn)),  ylab="",cex.names=0.6,main=paste( "Taxa ", "with selection frequency=", N ,sep=""),cex.lab=1,cex.main=1.5  )
     return(fr)
   }

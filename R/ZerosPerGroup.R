@@ -16,7 +16,25 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{ZerosPerGroup}}
+#' @examples
+#' \donttest{
+#' # Preparing data for analysis at OTU level
+#' Week3_otu = read_excel("Week3_otu.xlsx")
+#' Week3_otu = data.frame(Week3_otu)
+#' otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
+#' Week3_otu$Treatment_new = ifelse(Week3_otu$Treatment == "3PATCON", 0, 1)
+#' n_obs = dim(otu_w3)[2]
+#' n_control = table(Week3_otu$Treatment_new)[1]
+#' n_treated = table(Week3_otu$Treatment_new)[2]
+#' n_otu = dim(otu_mat_w3)[1]
 
+#' # Calculate zeros per groups
+#' zero_per_group_otu_w3 = ZerosPerGroup(Micro.mat = otu_mat_w3,
+#'                                      groups = Week3_otu$Treatment_new, week = 3,
+#'                                      n.obs = n_obs, n.control = n_control,
+#'                                      n.treated = n_treated, n.mi = n_otu,
+#'                                      plot = TRUE)
+#' }
 #' @import utils
 #' @import stats
 #' @import Biobase
@@ -28,11 +46,11 @@ ZerosPerGroup = function(Micro.mat, groups, week = 0,
                          n.treated = n.treated, n.mi = n.mi,
                          plot = FALSE){
 
-  subjects <- colnames(Micro.mat)
+  subjects = colnames(Micro.mat)
 
-  Micro.treatment <- data.frame(rbind(Micro.mat, treatment = groups)) ## 0 - Control, 1 - Treated
+  Micro.treatment = data.frame(rbind(Micro.mat, treatment = groups)) ## 0 - Control, 1 - Treated
 
-  Control <- Treated <- array (0,nrow(Micro.mat))
+  Control = Treated = array (0,nrow(Micro.mat))
 
   for(i in 1:(nrow(Micro.treatment)-1)) {
 
@@ -41,31 +59,31 @@ ZerosPerGroup = function(Micro.mat, groups, week = 0,
 
       if(Micro.treatment[i,j] == 0 && Micro.treatment["treatment",j] == 0){
 
-        Control[i] <- Control[i] + 1
+        Control[i] = Control[i] + 1
 
       } else if(Micro.treatment[i,j] == 0 && Micro.treatment["treatment",j] == 1){
 
-        Treated[i] <- Treated[i] + 1
+        Treated[i] = Treated[i] + 1
 
       }
     }
   }
 
-  zero.per.group <- matrix(0, nrow(Micro.mat), 9)
-  rownames(zero.per.group) <- rownames(Micro.mat)
-  colnames(zero.per.group) <- c("zero.ctrl", "propzero.ctrl", "nCtrl",
+  zero.per.group = matrix(0, nrow(Micro.mat), 9)
+  rownames(zero.per.group) = rownames(Micro.mat)
+  colnames(zero.per.group) = c("zero.ctrl", "propzero.ctrl", "nCtrl",
                                 "zero.Treated", "propzero.Treated", "nTreated",
                                 "zero.total", "propzero.total","nTotal")
 
-  zero.per.group[,1] <- Control
-  zero.per.group[,2] <- Control/n.control
-  zero.per.group[,3] <- n.control
-  zero.per.group[,4] <- Treated
-  zero.per.group[,5] <- Treated/n.treated
-  zero.per.group[,6] <- n.treated
-  zero.per.group[,7] <- Control + Treated
-  zero.per.group[,8] <- (Control + Treated)/n.obs
-  zero.per.group[,9] <- n.obs
+  zero.per.group[,1] = Control
+  zero.per.group[,2] = Control/n.control
+  zero.per.group[,3] = n.control
+  zero.per.group[,4] = Treated
+  zero.per.group[,5] = Treated/n.treated
+  zero.per.group[,6] = n.treated
+  zero.per.group[,7] = Control + Treated
+  zero.per.group[,8] = (Control + Treated)/n.obs
+  zero.per.group[,9] = n.obs
 
   prop.zero.group = data.frame(Microu = c(row.names(zero.per.group), row.names(zero.per.group)),
                                n = 1: n.mi,

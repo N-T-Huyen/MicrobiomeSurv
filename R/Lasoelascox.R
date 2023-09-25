@@ -33,6 +33,47 @@
 #' @seealso \code{\link[survival]{coxph}},
 #' \code{\link[MicrobiomeSurv]{EstimateHR}},
 #' \code{\link[glmnet]{glmnet}},
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+
+#' # Using the function
+#' lasso_fam_shan_w3 = Lasoelascox(Survival = survival_data_w3$Survival,
+#'                                 Censor = survival_data_w3$Censor,
+#'                                 Micro.mat = fam_shan_trim_w3,
+#'                                 Prognostic = prog_fam_w3,
+#'                                 Plots = TRUE,
+#'                                 Standardize = TRUE,
+#'                                 Alpha = 1,
+#'                                 Fold = 4,
+#'                                 nlambda = 100,
+#'                                 Mean = TRUE)
+#'
+#' # View the selected taxa
+#' lasso_fam_shan_w3$Selected.mi
+#'
+#' # Number of selected taxa
+#' lasso_fam_shan_w3$n
+#'
+#' # View the classification group of each subject
+#' lasso_fam_shan_w3$Risk.Group
+#'
+#' # View the survival analysis result
+#' lasso_fam_shan_w3$SurvFit
+#' }
 #' @import utils
 #' @import stats
 #' @import Biobase
@@ -41,7 +82,7 @@
 #' @export Lasoelascox
 
 
-Lasoelascox <- function (Survival,
+Lasoelascox = function (Survival,
                         Censor,
                         Micro.mat,
                         Prognostic,
@@ -60,22 +101,22 @@ Lasoelascox <- function (Survival,
   n.mi = dim(Micro.mat)[1]
   n.obs = dim(Micro.mat)[2]
 
-  mi.names <- rownames(Micro.mat)
+  mi.names = rownames(Micro.mat)
 
   if(is.null(Prognostic)){
-    Data <- Micro.mat
-    Data.Full <- t(Micro.mat)
-    Penalty <- rep(1, row(Data.Full))
+    Data = Micro.mat
+    Data.Full = t(Micro.mat)
+    Penalty = rep(1, row(Data.Full))
   } else{
-    Data <- t(Micro.mat)
-    Data.Full <- cbind(Data,Prognostic)
-    Penalty <- c(rep(1,ncol(Data)), rep(0, ncol(Prognostic)))
+    Data = t(Micro.mat)
+    Data.Full = cbind(Data,Prognostic)
+    Penalty = c(rep(1,ncol(Data)), rep(0, ncol(Prognostic)))
   }
 
   # Survival times must be larger than 0
 
-  Survival[Survival <= 0] <- quantile(Survival, probs = 0.01)
-  Lasso.Cox.CV <- glmnet::cv.glmnet(x = data.matrix(Data.Full),
+  Survival[Survival <= 0] = quantile(Survival, probs = 0.01)
+  Lasso.Cox.CV = glmnet::cv.glmnet(x = data.matrix(Data.Full),
                                     y = survival::Surv(as.vector(Survival),as.vector(Censor) == 1),
                                     family = 'cox',
                                     alpha = Alpha,
@@ -87,21 +128,21 @@ Lasoelascox <- function (Survival,
 
   # Results of the cv.glmnet procedure
 
-  Lambda <- Lasso.Cox.CV$lambda.min
-  Alllamda <- Lasso.Cox.CV$lambda
-  Coefficients <- coef(Lasso.Cox.CV, s =Lambda)
-  Coefficients.NonZero <- Coefficients[Coefficients[, 1] != 0, ]
+  Lambda = Lasso.Cox.CV$lambda.min
+  Alllamda = Lasso.Cox.CV$lambda
+  Coefficients = coef(Lasso.Cox.CV, s =Lambda)
+  Coefficients.NonZero = Coefficients[Coefficients[, 1] != 0, ]
 
   if (!is.null(dim(Coefficients.NonZero)))
   {
-    Selected.mi <- setdiff(colnames(Data.Full),colnames(Prognostic))
-    Coefficients.NonZero <- Coefficients[c(Selected.mi,colnames(Prognostic)),]
+    Selected.mi = setdiff(colnames(Data.Full),colnames(Prognostic))
+    Coefficients.NonZero = Coefficients[c(Selected.mi,colnames(Prognostic)),]
   }
 
   if (is.null(Prognostic)){
-    Selected.mi <- names(Coefficients.NonZero)
+    Selected.mi = names(Coefficients.NonZero)
   } else{
-    Selected.mi <- setdiff(names(Coefficients.NonZero), colnames(Prognostic))
+    Selected.mi = setdiff(names(Coefficients.NonZero), colnames(Prognostic))
   }
 
 
@@ -110,44 +151,44 @@ Lasoelascox <- function (Survival,
   # Decrease lambda until a taxon is selected
   # Going through the list of lambda values and repeat the above procedure
 
-  n <- length(Selected.mi)
+  n = length(Selected.mi)
 
-  Lambda <- Lasso.Cox.CV$lambda.min
-  Lambda.Sequence <- Lasso.Cox.CV$lambda
-  Lambda.Index <- which(Lambda.Sequence == Lasso.Cox.CV$lambda.min)
+  Lambda = Lasso.Cox.CV$lambda.min
+  Lambda.Sequence = Lasso.Cox.CV$lambda
+  Lambda.Index = which(Lambda.Sequence == Lasso.Cox.CV$lambda.min)
 
   Lambda.Index.Add = 0
 
   while (n <= 0) {
-    Lambda.Index.Add <- Lambda.Index.Add + 1
-    Coefficients <- coef(Lasso.Cox.CV, s = Lambda.Index + Lambda.Index.Add)
-    Coefficients.NonZero <- Coefficients[Coefficients[, 1] != 0,]
+    Lambda.Index.Add = Lambda.Index.Add + 1
+    Coefficients = coef(Lasso.Cox.CV, s = Lambda.Index + Lambda.Index.Add)
+    Coefficients.NonZero = Coefficients[Coefficients[, 1] != 0,]
 
     if (!is.null(dim(Coefficients.NonZero))){
-      Selected.mi <- setdiff(colnames(Data.Full), colnames(Prognostic))
-      Coefficients.NonZero <- Coefficients[c(Selected.mi,colnames(Prognostic)),]
+      Selected.mi = setdiff(colnames(Data.Full), colnames(Prognostic))
+      Coefficients.NonZero = Coefficients[c(Selected.mi,colnames(Prognostic)),]
     }
 
     if (is.null(Prognostic)){
-      Selected.mi <- names(Coefficients.NonZero)
+      Selected.mi = names(Coefficients.NonZero)
     } else {
-      Selected.mi <- setdiff(names(Coefficients.NonZero), colnames(Prognostic))
+      Selected.mi = setdiff(names(Coefficients.NonZero), colnames(Prognostic))
     }
-    Lambda <- Lambda.Sequence[Lambda.Index + Lambda.Index.Add]
-    n <- length(Selected.mi)
+    Lambda = Lambda.Sequence[Lambda.Index + Lambda.Index.Add]
+    n = length(Selected.mi)
 
     if (Lambda.Index.Add == length(Lambda.Sequence) & is.null(Selected.mi) == TRUE) stop("No taxa are selected")
   }
 
-  Risk.Scores <- as.vector(Coefficients.NonZero[Selected.mi] %*% t(Data[,Selected.mi]))
+  Risk.Scores = as.vector(Coefficients.NonZero[Selected.mi] %*% t(Data[,Selected.mi]))
 
   # Estimate the HR by running the appropriate function
 
-  Data.Survival <- cbind(Survival,Censor)
-  Estimation.HR <- EstimateHR(Risk.Scores = Risk.Scores, Data.Survival = Data.Survival,
+  Data.Survival = cbind(Survival,Censor)
+  Estimation.HR = EstimateHR(Risk.Scores = Risk.Scores, Data.Survival = Data.Survival,
                               Prognostic=Prognostic, Plots = FALSE, Mean = Mean, Quantile = Quantile)
-  Risk.Group <- Estimation.HR$Riskgroup
-  Cox.Fit.Risk.Group <- Estimation.HR$SurvResult
+  Risk.Group = Estimation.HR$Riskgroup
+  Cox.Fit.Risk.Group = Estimation.HR$SurvResult
 
   # Produce plots if requested
 
@@ -165,7 +206,7 @@ Lasoelascox <- function (Survival,
     for (i in 1:length(Lasso.Cox.CV$cvm))
       lines(log(c(Lasso.Cox.CV$lambda[i], Lasso.Cox.CV$lambda[i])), c(Lasso.Cox.CV$cvlo[i], Lasso.Cox.CV$cvup[i]))
 
-    Lasso.Cox <- glmnet::glmnet(x = data.matrix(Data.Full),
+    Lasso.Cox = glmnet::glmnet(x = data.matrix(Data.Full),
                                 y = survival::Surv(as.vector(Survival),as.vector(Censor) == 1),
                                 family = 'cox',
                                 alpha = Alpha,

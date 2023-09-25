@@ -27,10 +27,45 @@
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{SurvPlsClass}},
 #' \code{\link[MicrobiomeSurv]{SurvPcaClass}}
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
+#' # Using the function
+#' CVPls_fam_shan_w3 = CVPcaPls(Fold = 3,
+#'                             Survival = survival_data_w3$Survival,
+#'                             Micro.mat = fam_shan_trim_w3,
+#'                             Censor = survival_data_w3$Censor,
+#'                             Reduce=TRUE,
+#'                             Select=5,
+#'                             Prognostic = prog_fam_w3,
+#'                             Ncv=100,
+#'                             DR = "PLS")
+#'
+#' # Get the class of the object
+#' class(CVPls_fam_shan_w3)     # An "cvpp" Class
+#'
+#' # Method that can be used for the result
+#' show(CVPls_fam_shan_w3)
+#' summary(CVPls_fam_shan_w3)
+#' plot(CVPls_fam_shan_w3)
+#' }
 #' @export CVPcaPls
 
-CVPcaPls<-function(Fold = 3,
+CVPcaPls=function(Fold = 3,
                    Survival,
                    Micro.mat,
                    Censor,
@@ -47,17 +82,17 @@ CVPcaPls<-function(Fold = 3,
 
   if (Reduce) {
     if (is.null(Prognostic)){
-      DataForReduction<-list(x=Micro.mat,y=Survival, censoring.status=Censor, mi.names=rownames(Micro.mat))
-      TentativeList<-names(sort(abs(superpc::superpc.train(DataForReduction, type="survival")$feature.scores),decreasing =TRUE))[1:Select]
+      DataForReduction=list(x=Micro.mat,y=Survival, censoring.status=Censor, mi.names=rownames(Micro.mat))
+      TentativeList=names(sort(abs(superpc::superpc.train(DataForReduction, type="survival")$feature.scores),decreasing =TRUE))[1:Select]
       TentativeList
 
-      ReduMicro.mat<-Micro.mat[TentativeList, ]
+      ReduMicro.mat=Micro.mat[TentativeList, ]
     }
 
     if (!is.null(Prognostic)){
       if (is.data.frame(Prognostic)) {
-        nPrgFac<-ncol(Prognostic)
-        NameProg<-colnames(Prognostic)
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
       }
 
       if (dim(Prognostic)[2] == 1){
@@ -68,7 +103,7 @@ CVPcaPls<-function(Fold = 3,
 
       for(i in 1 : n.mi.full){
         xi = Micro.mat[i, ]
-        datai <- data.frame(Survival, Censor, xi, Prognostic)
+        datai = data.frame(Survival, Censor, xi, Prognostic)
         modeli = eval(parse(text = paste("survival::coxph(survival::Surv(Survival, Censor) ~ xi", paste("+", NameProg[1:nPrgFac], sep="", collapse =""), ",data=datai)" , sep="" )))
         coef[i] = round(summary(modeli)$coefficients[1,1], 4)
         exp.coef[i] = round(summary(modeli)$coefficients[1,2], 4)
@@ -79,83 +114,83 @@ CVPcaPls<-function(Fold = 3,
       summary = cbind(coef, exp.coef, p.value.LRT, p.value)
       rownames(summary) = rownames(Micro.mat)
       colnames(summary) = c("coef", "exp.coef", "p.value.LRT", "p.value")
-      TentativeList<-names(sort(abs(summary[ ,"p.value.LRT"]),decreasing =TRUE))[1:Select]
+      TentativeList=names(sort(abs(summary[ ,"p.value.LRT"]),decreasing =TRUE))[1:Select]
       TentativeList
 
-      ReduMicro.mat <- Micro.mat[TentativeList, ]
+      ReduMicro.mat = Micro.mat[TentativeList, ]
       summary.reduced = summary[TentativeList, ]
     }
 
   } else {
-    ReduMicro.mat <- Micro.mat
+    ReduMicro.mat = Micro.mat
   }
 
 
-  n.mi<-nrow(Micro.mat)
-  sen<-Censor               # Censoring indicator
-  surv <- Survival
+  n.mi=nrow(Micro.mat)
+  sen=Censor               # Censoring indicator
+  surv = Survival
 
-  if (is.data.frame(Prognostic)) {data1<-data.frame(sen,surv,Prognostic)
+  if (is.data.frame(Prognostic)) {data1=data.frame(sen,surv,Prognostic)
   } else{
-    data1<-data.frame(sen,surv)
+    data1=data.frame(sen,surv)
   }
 
 
-  HRp.train <- HRn.train <- matrix(0,Ncv,4)  # Training
-  HRp.test <- HRn.test<- matrix(0,Ncv,4)     # Testing
+  HRp.train = HRn.train = matrix(0,Ncv,4)  # Training
+  HRp.test = HRn.test= matrix(0,Ncv,4)     # Testing
 
-  n.train<-(n.obs-floor(n.obs/Fold))
-  n.test<-floor(n.obs/Fold)
-  cv.train <-matrix(0,Ncv,n.train)
-  cv.test  <-matrix(0,Ncv,n.test)
+  n.train=(n.obs-floor(n.obs/Fold))
+  n.test=floor(n.obs/Fold)
+  cv.train =matrix(0,Ncv,n.train)
+  cv.test  =matrix(0,Ncv,n.test)
 
 
   set.seed(123)
-  pIndex <- c(1:n.obs)
-  res <-res1<-res2<-res3<- vector("list", Ncv)
+  pIndex = c(1:n.obs)
+  res =res1=res2=res3= vector("list", Ncv)
   #------------------------  Begin FOR LOOP :1  --------------------------- i=1
   for (i in 1:Ncv){
     message('Cross validation loop ',i)
-    p1<-NA
-    p2<-NA
+    p1=NA
+    p2=NA
 
-    cv.train[i,] <-sort(sample(pIndex,n.train,replace=F) )
-    cv.test[i,] <-c(1:n.obs)[-c(intersect(cv.train[i, ], c(1:n.obs)))]
+    cv.train[i,] =sort(sample(pIndex,n.train,replace=F) )
+    cv.test[i,] =c(1:n.obs)[-c(intersect(cv.train[i, ], c(1:n.obs)))]
 
     if (DR=="PCA") { #-------------------------------------------------------------------------------------------
 
-  Temp1<-IntermediatePCA(Micro.mat,Prognostic,Survival,Censor,as.vector(cv.train[i, ]))
-      pc1  <- Temp1$pc1
-      cdata <-Temp1$cdata
-      m2 <- Temp1$m0
+  Temp1=IntermediatePCA(Micro.mat,Prognostic,Survival,Censor,as.vector(cv.train[i, ]))
+      pc1  = Temp1$pc1
+      cdata =Temp1$cdata
+      m2 = Temp1$m0
 
-  Temp2<-IntermediatePCA(Micro.mat,Prognostic,Survival,Censor,cv.test[i, ])
-      pc1test <- Temp2$pc1
-      ctestdata <- Temp2$cdata
+  Temp2=IntermediatePCA(Micro.mat,Prognostic,Survival,Censor,cv.test[i, ])
+      pc1test = Temp2$pc1
+      ctestdata = Temp2$cdata
 
 
       # classification method A1
-      TrtandPC1<-summary(m2)[[7]][c("pc1"),1]
-      p1 <-  TrtandPC1[1]*pc1
-      p2 <-  TrtandPC1[1]*pc1test
+      TrtandPC1=summary(m2)[[7]][c("pc1"),1]
+      p1 =  TrtandPC1[1]*pc1
+      p2 =  TrtandPC1[1]*pc1test
     }#-------------------------------------------------------------------------------------------
 
 
     if (DR=="PLS") { #-------------------------------------------------------------------------------------------
 
-      Temp3<-IntermediatePLS(Micro.mat,Prognostic,Survival,Censor,cv.train[i,])
-      pls.comp1  <- Temp3$pc1
-      cdata <-Temp3$cdata
-      m3 <- Temp3$m0
+      Temp3=IntermediatePLS(Micro.mat,Prognostic,Survival,Censor,cv.train[i,])
+      pls.comp1  = Temp3$pc1
+      cdata =Temp3$cdata
+      m3 = Temp3$m0
 
-      Temp4<-IntermediatePLS(Micro.mat,Prognostic,Survival,Censor,cv.test[i,])
-      pls.comp1.test <- Temp4$pc1
-      ctestdata <- Temp4$cdata
+      Temp4=IntermediatePLS(Micro.mat,Prognostic,Survival,Censor,cv.test[i,])
+      pls.comp1.test = Temp4$pc1
+      ctestdata = Temp4$cdata
 
       # classification method A1
-      TrtandPLSc1<-summary(m3)[[7]][c("pc1"),1]
-      p1 <- TrtandPLSc1[1]*pls.comp1
-      p2 <- TrtandPLSc1[1]*pls.comp1.test
+      TrtandPLSc1=summary(m3)[[7]][c("pc1"),1]
+      p1 = TrtandPLSc1[1]*pls.comp1
+      p2 = TrtandPLSc1[1]*pls.comp1.test
 
     }#-------------------------------------------------------------------------------------------
 
@@ -163,23 +198,23 @@ CVPcaPls<-function(Fold = 3,
     #######################
     ## training set ###########
 
-    TrainSet<-EstimateHR(p1,Data.Survival=cdata, Prognostic=data.frame(Prognostic[cv.train[i,],]), Plots = FALSE, Mean = TRUE, Quantile = 0.5)
-  HRp.train[i,] <- summary(TrainSet$SurvResult)[[8]][1,]
+    TrainSet=EstimateHR(p1,Data.Survival=cdata, Prognostic=data.frame(Prognostic[cv.train[i,],]), Plots = FALSE, Mean = TRUE, Quantile = 0.5)
+  HRp.train[i,] = summary(TrainSet$SurvResult)[[8]][1,]
 
     #######################
     ## test set ###########
 
-    mp1 <- median(p1)
-    TestSet<-EstimateHR(p2,Data.Survival=ctestdata, Prognostic=data.frame(Prognostic[cv.test[i,],]), Plots = FALSE, Mean = TRUE, Quantile = 0.5)
+    mp1 = median(p1)
+    TestSet=EstimateHR(p2,Data.Survival=ctestdata, Prognostic=data.frame(Prognostic[cv.test[i,],]), Plots = FALSE, Mean = TRUE, Quantile = 0.5)
 
-    HRp.test[i,] <- summary( TestSet$SurvResult)[[8]][1,]
+    HRp.test[i,] = summary( TestSet$SurvResult)[[8]][1,]
 
 
   }
   #------------------------  END of FOR LOOP :1
 
 
-  Results<-data.frame(Training=HRp.train[,1],Test=as.numeric(HRp.test[,1]))
+  Results=data.frame(Training=HRp.train[,1],Test=as.numeric(HRp.test[,1]))
 
   return(new("cvpp",Results=Results, Ncv=Ncv, Method=DR, CVtrain=cv.train, CVtest=cv.test, Select=n.mi))
 }

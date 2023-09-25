@@ -16,6 +16,28 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' \code{\link[MicrobiomeSurv]{CoxPHUni}}
+#' @examples
+#' \donttest{
+#' # Prepare data
+#' Week3_response = read_excel("Week3_response.xlsx")
+#' Week3_response = data.frame(Week3_response)
+#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
+#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+#' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+#' as.numeric(Week3_response$T1D)))
+#' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+#' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+#' colnames(prog_fam_shan_w3) = c("Treatment")
+#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+#' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+
+#' Using the funtion
+#' summary_fam_shan_w3 = CoxPHUni(Survival = surv_fam_shan_w3$Survival,
+#' Censor = surv_fam_shan_w3$Censor,
+#' Prognostic = prog_fam_shan_w3, Micro.mat = fam_shan_trim_w3, Method = "BH")
+#'}
 
 #' @import utils
 #' @import stats
@@ -24,15 +46,13 @@
 
 #' @export CoxPHUni
 
-
-
 CoxPHUni = function(Survival, Censor, Prognostic, Micro.mat, Method = "BH"){
   n.mi = dim(Micro.mat)[1]
   n.obs = dim(Micro.mat)[2]
   coef = exp.coef = p.value.LRT = c(1 : n.mi)
   if (is.data.frame(Prognostic)) {
-    nPrgFac<-ncol(Prognostic)
-    NameProg<-colnames(Prognostic)
+    nPrgFac=ncol(Prognostic)
+    NameProg=colnames(Prognostic)
   }
 
   if (dim(Prognostic)[2] == 1){
@@ -43,7 +63,7 @@ CoxPHUni = function(Survival, Censor, Prognostic, Micro.mat, Method = "BH"){
 
   for(i in 1 : n.mi){
     xi = Micro.mat[i, ]
-    datai <- data.frame(Survival, Censor, xi, Prognostic)
+    datai = data.frame(Survival, Censor, xi, Prognostic)
     modeli = eval(parse(text = paste("survival::coxph(survival::Surv(Survival, Censor) ~ xi", paste("+", NameProg[1:nPrgFac], sep="", collapse =""), ",data=datai)" , sep="" )))
     coef[i] = round(summary(modeli)$coefficients[1,1], 4)
     exp.coef[i] = round(summary(modeli)$coefficients[1,2], 4)

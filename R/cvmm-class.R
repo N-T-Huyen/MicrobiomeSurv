@@ -25,7 +25,6 @@
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{CVMspecificCoxPh}}
 
-
 setClass("cvmm",slots = representation(HRTrain="array",HRTest="array",train="matrix",test="matrix",n.mi="numeric",Ncv="numeric",Rdata="matrix"),
          prototype=list(HRTrain=array(NA,dim=c(1,1,1)),HRTest=array(NA,dim=c(1,1,1)),train=matrix(0,0,0), test=matrix(0,0,0),n.mi=1,Ncv=3,Rdata=matrix(0,0,0)))
 
@@ -53,20 +52,20 @@ setMethod("summary",signature="cvmm"
           ,function(object,which=1){
             cat("Summary of Cross Validation for the Taxon specific analysis\n")
             cat("Estimated Median of the cross Validated HR for Taxa: ",which,"\n")
-            HRTest  <- object@HRTest[which,,][1,]
-            HRTrain <- object@HRTrain[which,,][1,]
+            HRTest  = object@HRTest[which,,][1,]
+            HRTrain = object@HRTrain[which,,][1,]
 
-            mean.alpha <- median(HRTrain,na.rm=T)
-            se.alphal <- quantile(HRTrain,na.rm=T,probs = c(0.025))
-            se.alphau <- quantile(HRTrain,na.rm=T,probs = c(0.975))
+            mean.alpha = median(HRTrain,na.rm=T)
+            se.alphal = quantile(HRTrain,na.rm=T,probs = c(0.025))
+            se.alphau = quantile(HRTrain,na.rm=T,probs = c(0.975))
             cat("Estimated HR for Train Dataset \n")
             cat(paste(round(mean.alpha,4),"(",round(se.alphal,4)," , ",
                       round(se.alphau,4),")",sep=""))
 
             cat("\n")
-            mean.alpha <- median(HRTest,na.rm=T)
-            se.alphal <- quantile(HRTest,na.rm=T,probs = c(0.025))
-            se.alphau <- quantile(HRTest,na.rm=T,probs = c(0.975))
+            mean.alpha = median(HRTest,na.rm=T)
+            se.alphal = quantile(HRTest,na.rm=T,probs = c(0.025))
+            se.alphau = quantile(HRTest,na.rm=T,probs = c(0.975))
             cat("Estimated HR for Test Dataset \n")
             cat(paste(round(mean.alpha,4),"(",round(se.alphal,4)," , ",
                       round(se.alphau,4),")",sep=""))
@@ -87,21 +86,21 @@ setMethod("summary",signature="cvmm"
 #' @aliases cvmm-method
 setMethod(f="plot", signature = "cvmm",
           definition =  function(x,  y, which=1, ...) {
-            HRTest  <- x@HRTest[which,,][1,]
-            HRTrain <- x@HRTrain[which,,][1,]
-            Results<-data.frame(HRTrain, HRTest)
-            dotsCall <- substitute(list(...))
-            ll <- eval(dotsCall)
-            if(!hasArg("xlab")) ll$xlab <- ""
+            HRTest  = x@HRTest[which,,][1,]
+            HRTrain = x@HRTrain[which,,][1,]
+            Results=data.frame(HRTrain, HRTest)
+            dotsCall = substitute(list(...))
+            ll = eval(dotsCall)
+            if(!hasArg("xlab")) ll$xlab = ""
 
-            if(!hasArg("ylab")) ll$ylab <- "HR estimate"
-            if(!hasArg("main")) ll$main <- paste("Estimated HR of Low risk group for Taxon ", which, "\n Number of CVs = ",x@Ncv,sep="")
-            if(!hasArg("cex.lab")) ll$cex.lab <- 1.5
-            if(!hasArg("cex.main")) ll$cex.main <- 1
-            if(!hasArg("ylim")) ll$ylim <- c(0, 5) #max(max(HRTest), max(HRTrain))
-            if(!hasArg("col")) ll$col <- 2:3
+            if(!hasArg("ylab")) ll$ylab = "HR estimate"
+            if(!hasArg("main")) ll$main = paste("Estimated HR of Low risk group for Taxon ", which, "\n Number of CVs = ",x@Ncv,sep="")
+            if(!hasArg("cex.lab")) ll$cex.lab = 1.5
+            if(!hasArg("cex.main")) ll$cex.main = 1
+            if(!hasArg("ylim")) ll$ylim = c(0, 5) #max(max(HRTest), max(HRTrain))
+            if(!hasArg("col")) ll$col = 2:3
             if(!hasArg("names"))  ll$names=c("Training","Test")
-            ll$x<-Results
+            ll$x=Results
             do.call(boxplot,args=ll)
             return(invisible())
           }
