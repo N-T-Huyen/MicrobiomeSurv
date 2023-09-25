@@ -31,6 +31,32 @@ This function finds out the taxon has the smallest p-value, then calculate risk 
 Categorized subjects into high or low risk groups based on the mean of the risk score as a cutoff point
 Checking whether the two groups are significant difference in the probability to be survival.
 }
+\examples{
+\donttest{
+# Prepare data
+Week3_response = read_excel("Week3_response.xlsx")
+Week3_response = data.frame(Week3_response)
+Week3_response = Week3_response[order(Week3_response$SampleID), ]
+Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+as.numeric(Week3_response$T1D)))
+colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+colnames(prog_fam_shan_w3) = c("Treatment")
+fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+Obtain summary statistics for families
+summary_fam_shan_w3 = CoxPHUni(Survival = surv_fam_shan_w3$Survival, Censor = surv_fam_shan_w3$Censor,
+Prognostic = prog_fam_shan_w3, Micro.mat = fam_shan_trim_w3, Method = "BH")
+
+# Analysis of the taxon having smallest p-value (in the result of using CoxPHUni function)
+top1_fam_shan_w3 = Top1Uni(Result = summary_fam_shan_w3, Micro.mat = fam_shan_trim_w3,
+                           Survival = surv_fam_shan_w3$Survival, Censor = surv_fam_shan_w3$Censor,
+                           Plots = TRUE)
+}
+}
 \author{
 Thi Huyen Nguyen, \email{thihuyen.nguyen@uhasselt.be}
 

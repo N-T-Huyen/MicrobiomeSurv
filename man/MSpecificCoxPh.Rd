@@ -47,6 +47,38 @@ The Function fits cox proportional hazard model and does classification for each
 This function fits  taxon by taxon Cox proportional hazard model and perform the classification based on a microbiome risk score which has been estimated using a single taxon.
 Function is useful for majority vote classification method and taxon by taxon analysis and also for top K taxa.
 }
+\examples{
+\donttest{
+# Prepare data
+Week3_response = read_excel("Week3_response.xlsx")
+Week3_response = data.frame(Week3_response)
+Week3_response = Week3_response[order(Week3_response$SampleID), ]
+Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+as.numeric(Week3_response$T1D)))
+colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+colnames(prog_fam_shan_w3) = c("Treatment")
+fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+# Using the function
+Cox_taxon_fam_shan_w3 = MSpecificCoxPh(Survival = surv_fam_shan_w3$Survival,
+                                      Micro.mat = fam_shan_trim_w3,
+                                      Censor = surv_fam_shan_w3$Censor,
+                                      Reduce=TRUE,
+                                      Select=5,
+                                      Prognostic = prog_fam_shan_w3,
+                                      Mean = TRUE,
+                                      Method = "BH")
+
+# Results
+show(Cox_taxon_fam_shan_w3)
+summary(Cox_taxon_fam_shan_w3)
+}
+
+}
 \seealso{
 \code{\link[survival]{coxph}},  \code{\link[MicrobiomeSurv]{EstimateHR}}
 }

@@ -42,6 +42,41 @@ The risk scores obtained using the taxa is then used to generate the risk group 
 A Cox model is then fitted with the risk group as covariate in the presence or absence of  prognostic factors and or treatment effect.
 The extent of survival in the risk groups is known
 }
+\examples{
+\donttest{
+# Prepare data
+Week3_response = read_excel("Week3_response.xlsx")
+Week3_response = data.frame(Week3_response)
+Week3_response = Week3_response[order(Week3_response$SampleID), ]
+Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+as.numeric(Week3_response$T1D)))
+colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+colnames(prog_fam_shan_w3) = c("Treatment")
+fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+# Obtaning the risk score and data survival
+lasso_fam_shan_w3 = Lasoelascox(Survival = survival_data_w3$Survival,
+                                Censor = survival_data_w3$Censor,
+                                Micro.mat = fam_shan_trim_w3,
+                                Prognostic = prog_fam_shan_w3,
+                                Plots = TRUE,
+                                Standardize = TRUE,
+                                Alpha = 1,
+                                Fold = 4,
+                                nlambda = 100,
+                                Mean = TRUE)
+
+# Using the function
+est_HR_fam_shan_w3 = EstimateHR(Risk.Scores = lasso_fam_shan_w3$Risk.Scores,
+                                Data.Survival = lasso_fam_shan_w3$Data.Survival,
+                                Prognostic = prog_fam_shan_w3, Plots = TRUE,
+                                Mean = TRUE)
+}
+}
 \seealso{
 \code{\link[survival]{coxph}},
 \code{\link[MicrobiomeSurv]{EstimateHR}},

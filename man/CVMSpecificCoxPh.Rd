@@ -60,9 +60,45 @@ In addition, the classifier is then evaluated on test dataset for each particula
 The Process is repeated for all the full or reduced taxa to obtaind the HR statistics of the low risk group.
 The following steps depends on the number of cross validation specified.
 }
+\examples{
+\donttest{
+# Prepare data
+Week3_response = read_excel("Week3_response.xlsx")
+Week3_response = data.frame(Week3_response)
+Week3_response = Week3_response[order(Week3_response$SampleID), ]
+Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+as.numeric(Week3_response$T1D)))
+colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+colnames(prog_fam_shan_w3) = c("Treatment")
+fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+# Using the function
+CVCox_taxon_fam_shan_w3 = CVMSpecificCoxPh(Fold=3,
+                                           Survival = survival_data_w3$Survival,
+                                           Micro.mat = fam_shan_trim_w3,
+                                           Censor = survival_data_w3$Censor,
+                                           Reduce=TRUE,
+                                           Select=5,
+                                           Prognostic=prog_fam_w3,
+                                           Mean = TRUE,
+                                           Ncv=100)
+
+# Get the class of the object
+class(CVCox_taxon_fam_shan_w3)     # An "cvmm" Class
+
+# Method that can be used for the result
+show(CVCox_taxon_fam_shan_w3)
+summary(CVCox_taxon_fam_shan_w3)
+plot(CVCox_taxon_fam_shan_w3)
+}
+}
 \seealso{
 \code{\link[survival]{coxph}},
-\code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{MSpecificCoxPh}}
+\code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{MSpecificCoxPh}},
 }
 \author{
 Thi Huyen Nguyen, \email{thihuyen.nguyen@uhasselt.be}

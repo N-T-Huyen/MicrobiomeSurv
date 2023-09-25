@@ -16,6 +16,17 @@ A relative abundance matrix of OTUs
 \description{
 This function convert OTU matrix to RA matrix.
 }
+\examples{
+\donttest{
+# Read dataset
+Week3_otu = read_excel("Week3_otu.xlsx")
+Week3_otu = data.frame(Week3_otu)
+otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
+
+# Convert absolute abundance to relative abundance
+ra_otu_trim_w3 = GetRA(Micro.mat = otu_mat_w3)
+}
+}
 \seealso{
 \code{\link[MicrobiomeSurv]{GetRA}}
 }

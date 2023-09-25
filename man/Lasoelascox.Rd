@@ -60,6 +60,47 @@ This is done in the presence or absence of prognostic factors.
 The prognostic factor when available will always be forced to be in the model so no penalty for it.
 Optimum lambda will be used to select the non-zero shrinkage coefficients, the nonzero selceted taxa will thus be used in the survival analysis and in calculation of the risk scores.
 }
+\examples{
+\donttest{
+# Prepare data
+Week3_response = read_excel("Week3_response.xlsx")
+Week3_response = data.frame(Week3_response)
+Week3_response = Week3_response[order(Week3_response$SampleID), ]
+Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+as.numeric(Week3_response$T1D)))
+colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+colnames(prog_fam_shan_w3) = c("Treatment")
+fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+# Using the function
+lasso_fam_shan_w3 = Lasoelascox(Survival = survival_data_w3$Survival,
+                                Censor = survival_data_w3$Censor,
+                                Micro.mat = fam_shan_trim_w3,
+                                Prognostic = prog_fam_w3,
+                                Plots = TRUE,
+                                Standardize = TRUE,
+                                Alpha = 1,
+                                Fold = 4,
+                                nlambda = 100,
+                                Mean = TRUE)
+
+# View the selected taxa
+lasso_fam_shan_w3$Selected.mi
+
+# Number of selected taxa
+lasso_fam_shan_w3$n
+
+# View the classification group of each subject
+lasso_fam_shan_w3$Risk.Group
+
+# View the survival analysis result
+lasso_fam_shan_w3$SurvFit
+}
+}
 \seealso{
 \code{\link[survival]{coxph}}
 

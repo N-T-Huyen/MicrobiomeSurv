@@ -20,6 +20,18 @@ A matrix of the selected measurement of the chosen level.
 \description{
 This function gives indices such as Observed richness, Shannon index, Inverse Simpson, ... of higher level such as levelily, order, phylum, ...
 }
+\examples{
+\donttest{
+# Read dataset
+Week3_otu = read_excel("Week3_otu.xlsx")
+Week3_otu = data.frame(Week3_otu)
+otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
+fam_info_w3 = read_excel("fam_info_w3.xlsx")
+
+# USing the function
+fam_shan_w3 = SummaryData(Micro.mat = otu_mat_w3, info = fam_info_w3, measure = "shannon")
+}
+}
 \seealso{
 \code{\link[MicrobiomeSurv]{SummaryData}}
 }

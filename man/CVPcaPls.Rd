@@ -53,6 +53,42 @@ This function does cross validation for the analysis using two reduction method.
 If it is PCA then the \code{\link[MicrobiomeSurv]{SurvPcaClass}} is internally used for the cross validation
 and \code{\link[MicrobiomeSurv]{SurvPlsClass}} otherwise.
 }
+\examples{
+\donttest{
+# Prepare data
+Week3_response = read_excel("Week3_response.xlsx")
+Week3_response = data.frame(Week3_response)
+Week3_response = Week3_response[order(Week3_response$SampleID), ]
+Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+as.numeric(Week3_response$T1D)))
+colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+colnames(prog_fam_shan_w3) = c("Treatment")
+fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+# Using the function
+CVPls_fam_shan_w3 = CVPcaPls(Fold = 3,
+                            Survival = survival_data_w3$Survival,
+                            Micro.mat = fam_shan_trim_w3,
+                            Censor = survival_data_w3$Censor,
+                            Reduce=TRUE,
+                            Select=5,
+                            Prognostic = prog_fam_w3,
+                            Ncv=100,
+                            DR = "PLS")
+
+# Get the class of the object
+class(CVPls_fam_shan_w3)     # An "cvpp" Class
+
+# Method that can be used for the result
+show(CVPls_fam_shan_w3)
+summary(CVPls_fam_shan_w3)
+plot(CVPls_fam_shan_w3)
+}
+}
 \seealso{
 \code{\link[MicrobiomeSurv]{SurvPlsClass}},
 \code{\link[MicrobiomeSurv]{SurvPcaClass}}

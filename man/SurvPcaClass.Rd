@@ -53,6 +53,45 @@ This function can handle single and multiple microbiome. For larger microbiome m
 this function will reduce largermicrobiome matrix to smaller version using supervised pca approach and this is by default done and can be control by using the argument Reduce.
 Other prognostic factors can be included to the model.
 }
+\examples{
+\donttest{
+# Prepare data
+Week3_response = read_excel("Week3_response.xlsx")
+Week3_response = data.frame(Week3_response)
+Week3_response = Week3_response[order(Week3_response$SampleID), ]
+Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+as.numeric(Week3_response$T1D)))
+colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+colnames(prog_fam_shan_w3) = c("Treatment")
+fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+# Using the function
+SPCA_fam_shan_w3 = SurvPcaClass(Survival = survival_data_w3$Survival,
+                                Micro.mat = fam_shan_trim_w3,
+                                Censor = survival_data_w3$Censor,
+                                Reduce=TRUE,
+                                Select=5,
+                                Prognostic = prog_fam_w3,
+                                Plots = TRUE,
+                                Mean = TRUE)
+
+# Getting the survival regression output
+SPCA_fam_shan_w3$SurvFit
+
+# Getting the riskscores
+SPCA_fam_shan_w3$Riskscores
+
+# Getting the riskgroup
+SPCA_fam_shan_w3$Riskgroup
+
+# Obtaining the first principal component scores
+SPCA_fam_shan_w3$pc1
+}
+}
 \seealso{
 \code{\link[survival]{coxph}},
 \code{\link[microbiomeSurv]{EstimateHR}}, \code{\link[stats]{princomp}},

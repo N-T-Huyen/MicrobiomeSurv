@@ -21,6 +21,38 @@ This function outputs the mostly selected taxa during the LASSO and Elastic-net 
 Selected top taxa are ranked based on frequency of selection and also a particular frequency can be selected.
 In addition, it visualizes the selected top taxa based on the minimum frequency specified.
 }
+\examples{
+\donttest{
+# Prepare data
+Week3_response = read_excel("Week3_response.xlsx")
+Week3_response = data.frame(Week3_response)
+Week3_response = Week3_response[order(Week3_response$SampleID), ]
+Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
+surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
+as.numeric(Week3_response$T1D)))
+colnames(surv_fam_shan_w3) = c("Survival", "Censor")
+prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
+colnames(prog_fam_shan_w3) = c("Treatment")
+fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
+# Cross-Validation for LASSO and ELASTIC-NET
+CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = survival_data_w3$Survival,
+                                     Censor = survival_data_w3$Censor,
+                                     Micro.mat = fam_shan_trim_w3,
+                                     Prognostic = prog_fam_w3,
+                                     Standardize = TRUE,
+                                     Alpha = 1,
+                                     Fold = 4,
+                                     Ncv = 100,
+                                     nlambda = 100)
+
+
+# Using the function
+MiFreq_fam_shan_w3 = MiFreq(Object = CV_lasso_fam_shan_w3, TopK=5)
+}
+}
 \seealso{
 \code{\link[MicrobiomeSurv]{cvmm}}, \code{\link[survival]{coxph}},
 \code{\link[MicrobiomeSurv]{EstimateHR}},\code{\link[MicrobiomeSurv]{CVLasoelacox}}
