@@ -33,32 +33,6 @@
 #' @seealso \code{\link[survival]{coxph}},
 #' \code{\link[MicrobiomeSurv]{EstimateHR}},
 #' \code{\link[glmnet]{glmnet}},
-#' @examples
-#' \donttest{
-#' # Using the function
-#' lasso_fam_shan_w3 = Lasoelascox(Survival = survival_data_w3$Survival,
-#'                                 Censor = survival_data_w3$Censor,
-#'                                 Micro.mat = fam_shan_trim_w3,
-#'                                 Prognostic = prog_fam_w3,
-#'                                 Plots = TRUE,
-#'                                 Standardize = TRUE,
-#'                                 Alpha = 1,
-#'                                 Fold = 4,
-#'                                 nlambda = 100,
-#'                                 Mean = TRUE)
-#'
-#' # View the selected taxa
-#' lasso_fam_shan_w3$Selected.mi
-#'
-#' # Number of selected taxa
-#' lasso_fam_shan_w3$n
-#'
-#' # View the classification group of each subject
-#' lasso_fam_shan_w3$Risk.Group
-#'
-#' # View the survival analysis result
-#' lasso_fam_shan_w3$SurvFit
-#' }
 #' @import utils
 #' @import stats
 #' @import Biobase

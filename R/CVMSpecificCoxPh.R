@@ -31,28 +31,8 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[survival]{coxph}},
-#' \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{MSpecificCoxPh}},
-#' @examples
-#' \donttest{
-#' # Using the function
-#' CVCox_taxon_fam_shan_w3 = CVMSpecificCoxPh(Fold=3,
-#'                                            Survival = survival_data_w3$Survival,
-#'                                            Micro.mat = fam_shan_trim_w3,
-#'                                            Censor = survival_data_w3$Censor,
-#'                                            Reduce=TRUE,
-#'                                            Select=5,
-#'                                            Prognostic=prog_fam_w3,
-#'                                            Mean = TRUE,
-#'                                            Ncv=100)
-#'
-#' # Get the class of the object
-#' class(CVCox_taxon_fam_shan_w3)     # An "cvmm" Class
-#'
-#' # Method that can be used for the result
-#' show(CVCox_taxon_fam_shan_w3)
-#' summary(CVCox_taxon_fam_shan_w3)
-#' plot(CVCox_taxon_fam_shan_w3)
-#' }
+#' \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{MSpecificCoxPh}}
+
 
 #' @export CVMSpecificCoxPh
 

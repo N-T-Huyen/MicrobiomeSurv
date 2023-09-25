@@ -14,23 +14,6 @@
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{cvmm}}, \code{\link[survival]{coxph}},
 #' \code{\link[MicrobiomeSurv]{EstimateHR}},\code{\link[MicrobiomeSurv]{CVLasoelacox}}
-#' @examples
-#' \donttest{
-#' # Cross-Validation for LASSO and ELASTIC-NET
-#' CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = survival_data_w3$Survival,
-#'                                      Censor = survival_data_w3$Censor,
-#'                                      Micro.mat = fam_shan_trim_w3,
-#'                                      Prognostic = prog_fam_w3,
-#'                                      Standardize = TRUE,
-#'                                      Alpha = 1,
-#'                                      Fold = 4,
-#'                                      Ncv = 100,
-#'                                      nlambda = 100)
-#'
-#'
-#' # Using the function
-#' MiFreq_fam_shan_w3 = MiFreq(Object = CV_lasso_fam_shan_w3, TopK=5)
-#' }
 #' @export MiFreq
 
 MiFreq<-function(Object,

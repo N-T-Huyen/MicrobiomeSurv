@@ -24,31 +24,7 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{CVMspecificCoxPh}}
-#' @examples
-#' \donttest{
-#' ## GENERATE SOME MICROBIOME SURVIVAL DATA WITH PROGNOSTIC FACTORS
-#' Data<-MSData(nPatients=100, nOTU=150, nFam = 20, Prop=0.5)
-#'
-#' ## USING THE FUNCTION
-#' Result = CVMSpecificCoxPh(Fold=3,
-#'                           Survival=Data$Survival,
-#'                           Micro.mat=t(Data$Micro.mat),
-#'                           Censor= Data$Censor,
-#'                           Reduce=TRUE,
-#'                           Select=15,
-#'                           Prognostic=Data$Prognostic,
-#'                           Mean = TRUE,
-#'                           Quantile = 0.5,
-#'                           Ncv=3)
-#'
-#' ## GET THE CLASS OF THE OBJECT
-#' class(Result)     # An "cvmm" Class
-#'
-#' ##  METHOD THAT CAN BE USED FOR THIS CLASS
-#' show(Result)
-#' summary(Result)
-#' plot(Result)
-#' }
+
 
 setClass("cvmm",slots = representation(HRTrain="array",HRTest="array",train="matrix",test="matrix",n.mi="numeric",Ncv="numeric",Rdata="matrix"),
          prototype=list(HRTrain=array(NA,dim=c(1,1,1)),HRTest=array(NA,dim=c(1,1,1)),train=matrix(0,0,0), test=matrix(0,0,0),n.mi=1,Ncv=3,Rdata=matrix(0,0,0)))

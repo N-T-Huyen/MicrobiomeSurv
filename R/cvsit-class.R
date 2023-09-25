@@ -20,35 +20,7 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{CVPcaPls}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}
-#' @examples
-#' \donttest{
-#' ## GENERATE SOME MICROBIOME SURVIVAL DATA WITH PROGNOSTIC FACTORS
-#' Data <- MSData(nPatients=100, nOTU=150, nFam = 20, Prop=0.5)
-#'
-#' ## FIRST IS THE TAXON BY TAXON ANALYSIS
-#' w = CVMSpecificCoxPh(Fold=3,
-#'                      Survival=Data$Survival,
-#'                      Mdata=t(Data$Mdata),
-#'                      Censor= Data$Censor,
-#'                      Reduce=TRUE,
-#'                      Select=15,
-#'                      Prognostic=Data$Prognostic,
-#'                      Mean = TRUE, 
-#'                      Quantile = 0.5,
-#'                      Ncv=3)
-#'
-#' ## USING THE FUNCTION
-#' Result = CVSITaxa(w, Top = seq(5, 100, by = 5), Survival=Data$Survival,
-#'                Censor=Data$Censor, Prognostic = Data$Prognostic)
-#'
-#' ## GET THE CLASS OF THE OBJECT
-#' class(Result)     # A "cvsit" Class
-#'
-#' ##  METHOD THAT CAN BE USED FOR THE RESULT
-#' show(Result)
-#' summary(Result)
-#' plot(Result, type =2)
-#' }
+
 #' @importFrom methods setClass setGeneric setMethod setRefClass
 
 setClass("cvsit",representation(HRpca="array",HRpls="array",Ntaxa="numeric",Ncv="numeric",Top="numeric"),

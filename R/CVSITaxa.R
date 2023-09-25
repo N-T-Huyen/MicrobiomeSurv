@@ -22,30 +22,7 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{MSpecificCoxPh}}, \code{\link[MicrobiomeSurv]{SITaxa}}
-#' @examples
-#' \donttest{
-#' # Getting the cvmm object
-#' CVCox_taxon_fam_shan_w3 = CVMSpecificCoxPh(Fold=3,
-#'                                            Survival = survival_data_w3$Survival,
-#'                                            Micro.mat = fam_shan_trim_w3,
-#'                                            Censor = survival_data_w3$Censor,
-#'                                            Reduce=TRUE,
-#'                                            Select=5,
-#'                                            Prognostic=prog_fam_w3,
-#'                                            Mean = TRUE,
-#'                                            Ncv=100)
-#'
-#' # Using the function
-#'  CVSITaxa_fam_shan_w3 = CVSITaxa(Object = CVCox_taxon_fam_shan_w3,
-#'                                  Top=seq(1, 6, by=2),
-#'                                  Survival = survival_data_w3$Survival,
-#'                                  Censor = survival_data_w3$Censor,
-#'                                  Prognostic=prog_fam_w3)
-#'
-#' # Get the class of the object
-#' class(CVSITaxa_fam_shan_w3)     # An "cvsit" Class
-#' }
-#'
+
 #' @export CVSITaxa
 
 CVSITaxa <- function(Object,

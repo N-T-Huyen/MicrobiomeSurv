@@ -21,39 +21,6 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{MSpecificCoxPh}}, \code{\link[survival]{coxph}},  \code{\link[MicrobiomeSurv]{EstimateHR}}
-#' @references
-#' \insertRef{tib}{MicrobiomeSurv}
-#' @examples
-#' \donttest{
-#' # Running the taxon specific function
-#' Cox_taxon_fam_shan_w3 = MSpecificCoxPh(Survival = survival_data_w3$Survival,
-#'                                        Micro.mat = fam_shan_trim_w3,
-#'                                        Censor = survival_data_w3$Censor,
-#'                                        Reduce=TRUE,
-#'                                        Select=5,
-#'                                        Prognostic = prog_fam_w3,
-#'                                        Mean = TRUE,
-#'                                        Method = "BH")
-#'
-#' # Using the function
-#' Majority_fam_shan_w3 = Majorityvotes(Result = Cox_taxon_fam_shan_w3,
-#'                                      Prognostic = prog_fam_w3,
-#'                                      Survival = survival_data_w3$Survival,
-#'                                      Censor = survival_data_w3$Censor,
-#'                                      J=1)
-#'
-#' # The survival analysis for majority vote result
-#' Majority_fam_shan_w3$Model.result
-#'
-#' # The majority vote for each subject
-#' Majority_fam_shan_w3$N
-#'
-#' # The majority vote classification for each subject
-#' Majority_fam_shan_w3$Classif
-#'
-#' # The group for each subject based on the taxon specific analysis
-#' Majority_fam_shan_w3$Group
-#' }
 #' @export Majorityvotes
 
 

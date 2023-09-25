@@ -21,27 +21,7 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{Majorityvotes}}
-#' @examples
-#' \donttest{
-#' # Using the function
-#' CVMajority_fam_shan_w3 = CVMajorityvotes(Survival = survival_data_w3$Survival,
-#'                                          Micro.mat = fam_shan_trim_w3,
-#'                                          Censor = survival_data_w3$Censor,
-#'                                          Reduce=TRUE,
-#'                                          Select=5,
-#'                                          Mean = TRUE,
-#'                                          Prognostic = prog_fam_w3,
-#'                                          Fold=3,
-#'                                          Ncv=100)
-#'
-#' # Get the class of the object
-#' class(CVMajority_fam_shan_w3)     # An "cvmv" Class
-#'
-#' # Method that can be used for the result
-#' show(CVMajority_fam_shan_w3)
-#' summary(CVMajority_fam_shan_w3)
-#' plot(CVMajority_fam_shan_w3)
-#' }
+
 #' @import survival
 #' @export CVMajorityvotes
 

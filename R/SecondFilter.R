@@ -15,12 +15,6 @@
 #' @author Ziv Shkedy
 #'
 #' @seealso\code{\link[MicrobiomeSurv]{SecondFilter}}
-#' @examples
-#' \donttest{
-#' # Using the function
-#' otu_trim_w3 = SecondFilter(zero.per.group = zero_per_group_otu_w3[[1]],
-#'                            Micro.mat = otu_w3, threshold = 0.7, week = 3)
-#' }
 #' @import utils
 #' @import stats
 #' @import Biobase

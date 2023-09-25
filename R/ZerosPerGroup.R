@@ -16,21 +16,7 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{ZerosPerGroup}}
-#' @examples
-#' \donttest{
-#' Week3_otu$Treatment_new = ifelse(Week3_otu$Treatment == "3PATCON", 0, 1)
-#' n_obs = dim(otu_w3)[2]
-#' n_control = table(Week3_otu$Treatment_new)[1]
-#' n_treated = table(Week3_otu$Treatment_new)[2]
-#' n_otu = dim(otu_mat_w3)[1]
 
-#' # Calculate zeros per groups
-#' zero_per_group_otu_w3 = ZerosPerGroup(Micro.mat = otu_mat_w3,
-#'                                      groups = Week3_otu$Treatment_new, week = 3,
-#'                                      n.obs = n_obs, n.control = n_control,
-#'                                      n.treated = n_treated, n.mi = n_otu,
-#'                                      plot = TRUE)
-#' }
 #' @import utils
 #' @import stats
 #' @import Biobase

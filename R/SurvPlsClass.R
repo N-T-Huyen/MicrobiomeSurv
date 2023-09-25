@@ -31,32 +31,6 @@
 #' @seealso \code{\link[survival]{coxph}},
 #' \code{\link[microbiomeSurv]{EstimateHR}}, \code{\link[pls]{plsr}},
 #'  \code{\link[microbiomeSurv]{SurvPcaClass}}
-#' @references
-#' \insertRef{ye1}{microbiomeSurv}
-#' @examples
-#' \donttest{
-#' # Using the function
-#' SPLS_fam_shan_w3 = SurvPlsClass(Survival = survival_data_w3$Survival,
-#'                                 Micro.mat = fam_shan_trim_w3,
-#'                                 Censor = survival_data_w3$Censor,
-#'                                 Reduce=TRUE,
-#'                                 Select=5,
-#'                                 Prognostic = prog_fam_w3,
-#'                                 Plots = TRUE,
-#'                                 Mean = TRUE)
-#'
-#' # Getting the survival regression output
-#' SPLS_fam_shan_w3$SurvFit
-#'
-#' # Getting the riskscores
-#' SPLS_fam_shan_w3$Riskscores
-#'
-#' # Getting the riskgroup
-#' SPLS_fam_shan_w3$Riskgroup
-#'
-#' # Obtaining the first principal component scores
-#' SPLS_fam_shan_w3$pc1
-#' }
 #' @export SurvPlsClass
 
 

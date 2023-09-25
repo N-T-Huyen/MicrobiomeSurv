@@ -24,27 +24,6 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[survival]{coxph}},  \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{MSpecificCoxPh}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}
-#' @references
-#' \insertRef{ye1}{MicrobiomeSurv}
-#' @examples
-#' \donttest{
-#' # Using the function
-#' SITaxa_fam_shan_w3 = SITaxa(TopK=5,
-#'                             Survival = survival_data_w3$Survival,
-#'                             Micro.mat = fam_shan_trim_w3,
-#'                             Censor = survival_data_w3$Censor,
-#'                             Reduce=TRUE,
-#'                             Select=5,
-#'                             Prognostic=prog_fam_w3,
-#'                             Plot = TRUE,
-#'                             DM="PLS")
-#'
-#' # For the HR statistics
-#' SITaxa_fam_shan_w3$Result
-#'
-#' # For the graphical output
-#' SITaxa_fam_shan_w3$TopKplot
-#' }
 #' @export SITaxa
 
 

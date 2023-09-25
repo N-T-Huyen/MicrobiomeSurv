@@ -17,13 +17,7 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' \code{\link[MicrobiomeSurv]{Top1Uni}}
-#' @examples
-#' \donttest{
-#' # Analysis of the taxon having smallest p-value (in the result of using CoxPHUni function)
-#' top1_fam_shan_w3 = Top1Uni(Result = summary_fam_shan_w3, Micro.mat = fam_shan_trim_w3,
-#'                            Survival = surv_fam_shan_w3$Survival, Censor = surv_fam_shan_w3$Censor,
-#'                            Plots = TRUE)
-#' }
+
 #' @import utils
 #' @import stats
 #' @import Biobase

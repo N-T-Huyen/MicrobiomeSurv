@@ -19,28 +19,7 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{CVPcaPls}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}
-#' @examples
-#' ## GENERATE SOME MICROBIOME SURVIVAL DATA WITH PROGNOSTIC FACTORS
-#' Data <- MSData(nPatients=100, nOTU=150, nFam = 20, Prop=0.5)
-#'
-#' ## USING THE FUNCTION
-#' Result = CVPcaPls(Fold = 4,
-#'                   Survival = Data$Survival,
-#'                   Mdata = t(Data$Mdata),
-#'                   Censor = Data$Censor,
-#'                   Reduce=TRUE,
-#'                   Select=15,
-#'                   Prognostic= Data$Prognostic,
-#'                   Ncv=100,
-#'                   DR ="PLS")
-#'
-#' ## GET THE CLASS OF THE OBJECT
-#' class(Result)     # A "cvpp" Class
-#'
-#' ##  METHOD THAT CAN BE USED FOR THE RESULT
-#' show(Result)
-#' summary(Result)
-#' plot(Result)
+
 
 setClass("cvpp",representation(Results="data.frame",Ncv="numeric",Method="vector",CVtrain="matrix",CVtest="matrix",Select="numeric"),
          prototype=list(Results=data.frame(1),Ncv=numeric(),Method="PCA",CVtrain=matrix(0,0,0),CVtest=matrix(0,0,0),Select=numeric()))

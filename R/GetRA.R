@@ -9,11 +9,7 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{GetRA}}
-#' @examples
-#' \donttest{
-#' # Convert absolute abundance to relative abundance
-#' ra_otu_trim_w3 = GetRA(Micro.mat = otu_trim_w3)
-#' }
+
 #' @import utils
 #' @import stats
 #' @import Biobase

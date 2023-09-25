@@ -27,29 +27,7 @@
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{SurvPlsClass}},
 #' \code{\link[MicrobiomeSurv]{SurvPcaClass}}
-#' @references
-#' \insertRef{ye1}{MicrobiomeSurv}
-#' @examples
-#' \donttest{
-#' # Using the function
-#' CVPls_fam_shan_w3 = CVPcaPls(Fold = 3,
-#'                             Survival = survival_data_w3$Survival,
-#'                             Micro.mat = fam_shan_trim_w3,
-#'                             Censor = survival_data_w3$Censor,
-#'                             Reduce=TRUE,
-#'                             Select=5,
-#'                             Prognostic = prog_fam_w3,
-#'                             Ncv=100,
-#'                             DR = "PLS")
-#'
-#' # Get the class of the object
-#' class(CVPls_fam_shan_w3)     # An "cvpp" Class
-#'
-#' # Method that can be used for the result
-#' show(CVPls_fam_shan_w3)
-#' summary(CVPls_fam_shan_w3)
-#' plot(CVPls_fam_shan_w3)
-#' }
+
 #' @export CVPcaPls
 
 CVPcaPls<-function(Fold = 3,

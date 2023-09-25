@@ -33,31 +33,7 @@
 #' @author Ziv Shkedy
 #' @seealso \code{\link[survival]{coxph}},
 #' \code{\link[Microbiome]{EstimateHR}}, \code{\link[glmnet]{glmnet}}, \code{\link[Microbiome]{Lasoelacox}}
-#' @examples
-#' \donttest{
-#' # Using the function
-#' CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = survival_data_w3$Survival,
-#'                                      Censor = survival_data_w3$Censor,
-#'                                      Micro.mat = fam_shan_trim_w3,
-#'                                      Prognostic = prog_fam_w3,
-#'                                      Standardize = TRUE,
-#'                                      Alpha = 1,
-#'                                      Fold = 4,
-#'                                      Ncv = 100,
-#'                                      nlambda = 100)
-#'
-#' # Number of selected taxa per CV
-#' CV_lasso_fam_shan_w3@n
-#'
-#' # Get the matrix of coefficients
-#' Results@Coef.mat
-#'
-#' # Survival information of the train dataset
-#' Results@HRTrain
-#'
-#' # Survival information of the test dataset
-#' Results@HRTest
-#' }
+
 #' @export CVLasoelascox
 #' @import superpc
 #' @import stats

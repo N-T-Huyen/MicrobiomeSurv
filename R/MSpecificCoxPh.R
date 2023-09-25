@@ -21,23 +21,6 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[survival]{coxph}},  \code{\link[MicrobiomeSurv]{EstimateHR}}
-#' @examples
-#' \donttest{
-#' # Using the function
-#' Cox_taxon_fam_shan_w3 = MSpecificCoxPh(Survival = surv_fam_shan_w3$Survival,
-#'                                       Micro.mat = fam_shan_trim_w3,
-#'                                       Censor = surv_fam_shan_w3$Censor,
-#'                                       Reduce=TRUE,
-#'                                       Select=5,
-#'                                       Prognostic = prog_fam_shan_w3,
-#'                                       Mean = TRUE,
-#'                                       Method = "BH")
-#'
-#' # Results
-#' show(Cox_taxon_fam_shan_w3)
-#' summary(Cox_taxon_fam_shan_w3)
-#'}
-#'
 #' @export MSpecificCoxPh
 
 MSpecificCoxPh<-function(Survival,

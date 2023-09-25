@@ -25,23 +25,6 @@
 #' @seealso \code{\link[survival]{coxph}},\code{\link[MicrobiomeSurv]{EstimateHR}},
 #' \code{\link[MicrobiomeSurv]{SurvPcaClass}},
 #'  \code{\link[MicrobiomeSurv]{SurvPlsClass}},\code{\link[MicrobiomeSurv]{Lasoelascox}}
-#' @references
-#' \insertRef{ye1}{MicrobiomeSurv}
-#' @examples
-#' \donttest{
-#' # Using the PCA method
-#' QuantileAnalysis_PCA_fam_shan_w3 = QuantileAnalysis(Survival = surv_fam_shan_w3$Survival,
-#'                                                     Micro.mat = fam_shan_trim_w3,
-#'                                                     Censor = surv_fam_shan_w3$Censor,
-#'                                                     Reduce=TRUE,
-#'                                                     Select= 5,
-#'                                                     Prognostic=prog_fam_shan_w3,
-#'                                                     Plots = TRUE,
-#'                                                     DM="PCA",
-#'                                                     Alpha =1)
-#'
-#'}
-
 
 #' @export QuantileAnalysis
 
