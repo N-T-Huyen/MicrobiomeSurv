@@ -87,13 +87,18 @@ zero_per_group_otu_w3 = ZerosPerGroup(Micro.mat = otu_mat_w3,
 
 
 ### Removing OTUs having at least 70% of zeros in at least one treatment group
-otu_trim_w3 = SecondFilter(zero.per.group = zero_per_group_otu_w3[[1]],
-                           Micro.mat = otu_w3, threshold = 0.7, week = 3)
+#data_zero_per_group_otu_w3 = as.data.frame(zero_per_group_otu_w3[[1]])
+#data_zero_per_group_otu_w3 <- cbind(" "=rownames(data_zero_per_group_otu_w3),
+#                                    data_zero_per_group_otu_w3)
+#write_xlsx(as.data.frame(data_zero_per_group_otu_w3), "data_zero_per_group_otu_w3.xlsx")
+data_zero_per_group_otu_w3 = read_excel("data_zero_per_group_otu_w3.xlsx")
+otu_trim_w3 = SecondFilter(zero.per.group = data_zero_per_group_otu_w3,
+                           Micro.mat = otu_mat_w3, threshold = 0.7, week = 3)
 
 dim(otu_trim_w3) # 7 81
 
 ## Convert absolute abundance to relative abundance
-ra_otu_trim_w3 = GetRA(Micro.mat = otu_trim_w3)
+ra_otu_trim_w3 = GetRA(Micro.mat = otu_mat_w3)
 dim(ra_otu_trim_w3)
 
 ## Plot of percentage of zeros per groups
@@ -108,37 +113,17 @@ savePlot(filename = "Percentage of zeros otu week 3", type = "png")
 # ************ #
 
 # Preparing data for analysis at family level
-fam = otus_data[c("Family", "OTUID")]
-otus$OTUID = row.names(otus)
-otufam = inner_join(otus, fam)
-otu_fam_w3 = otufam[,which(colnames(otufam) %in% c(Week3_response$SampleID, "OTUID", "Family"))]
-fam_w3 = otu_fam_w3[ , c("OTUID", "Family")]
-otu_data_w3 = otu_fam_w3[ , 1:n_obs]
-rownames(otu_data_w3) = otu_fam_w3$OTUID
 
-fam_shan_w3 = SummaryData(Micro.mat = otu_data_w3, info = fam_w3, measure = "shannon")
+fam_info_w3 = read_excel("fam_info_w3.xlsx")
 
-fam_shan_filter_w3 = FirstFilter(t(fam_shan_w3[, -c(dim(fam_shan_w3)[2])]))
-n_fam_w3 = dim(fam_shan_filter_w3)[1]
-
-### Calculate zeros per groups
-zero_per_group_fam_shan_w3 = ZerosPerGroup(Micro.mat = fam_shan_filter_w3,
-                                           groups = Week3_otu$Treatment_new, week = 3,
-                                           n.obs = n_obs, n.control = n_control,
-                                           n.treated = n_treated, n.mi = n_fam_w3,
-                                           plot = TRUE)
-
-### Removing OTUs having at least 90% of zeros in at least one treatment group
-#### 70% -- 0 families
-#### 80% -- 2 families
-#### 90% -- 6 families
-
-fam_shan_trim_w3 = SecondFilter(zero.per.group = zero_per_group_fam_shan_w3[[1]],
-                                Micro.mat = fam_shan_filter_w3, threshold = 0.9, week = 3)
-
-dim(fam_shan_trim_w3) # 6 81
+fam_shan_w3 = SummaryData(Micro.mat = otu_mat_w3, info = fam_info_w3, measure = "shannon")
 
 # Analysis at family level
+
+fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
+names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
+rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
 n_fam_shan_w3 = dim(fam_shan_trim_w3)[1]
 Week3_response = read_excel("Week3_response.xlsx")
