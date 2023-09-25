@@ -1,0 +1,31 @@
+
+Package: MicrobiomeSurv
+Type: Package
+Title: A Biomarker Validation Approach for Classification and Predicting Survival 
+       Using Microbiome Data
+Version: 0.1.0
+Authors@R: 
+       c(person("Thi Huyen","Nguyen", email="thihuyen.nguyen@uhasselt.be", role=c("aut","cre")),
+       person("Olajumoke Evangelina","Owokotomo", email="olajumoke.x.owokotomo@gsk.com", role="aut"),
+       person("Ziv","Shkedy", email="ziv.shkedy@uhasselt.be", role="aut"))
+Maintainer: Thi Huyen Nguyen <thihuyen.nguyen@uhasselt.be>
+Description: An approach to identify microbiome biomarker for time to event data by discovering microbiome for predicting survival 
+    and classifying subjects into risk groups. Classifiers are constructed as a linear combination of important microbiome and treatment 
+    effects if necessary. Several methods were implemented to estimate the microbiome risk score such as majority voting technique, LASSO, 
+    Elastic net, supervised principle component analysis (SPCA), and supervised partial least squares analysis (SPLS).
+    Sensitivity analysis on the quantile used for the classification can also be accessed to check the deviation of the classification group 
+    based on the quantile specified. Large scale cross validation can be performed in order to investigate the mostly selected microbiome and 
+    for internal validation. During the evaluation process, validation is accessed using the hazard ratios (HR) distribution of the test set 
+    and inference is mainly based on resampling and permutations technique.
+URL: https://github.com/N-T-Huyen/MicrobiomeSurv
+BugReports: https://github.com/N-T-Huyen/MicrobiomeSurv/issues/new
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)
