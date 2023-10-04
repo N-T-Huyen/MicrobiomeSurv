@@ -28,7 +28,7 @@
 \item{...}{The usual extra arguments to generic functions — see \code{\link[graphics]{plot}}, \code{\link[graphics]{plot.default}}}
 }
 \description{
-Class of object returned by function \code{\link[MicrobiomeSurv]{CVLasoelacox}}.
+Class of object returned by function \code{\link[MicrobiomeSurv]{CVLasoelascox}}.
 }
 \section{Slots}{
 
@@ -51,7 +51,7 @@ Class of object returned by function \code{\link[MicrobiomeSurv]{CVLasoelacox}}.
 }}
 
 \seealso{
-\code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[glmnet]{glmnet}}, \code{\link[MicrobiomeSurv]{Lasoelacox}}
+\code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[glmnet]{glmnet}}, \code{\link[MicrobiomeSurv]{Lasoelascox}}
 }
 \author{
 Thi Huyen Nguyen, \email{thihuyen.nguyen@uhasselt.be}

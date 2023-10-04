@@ -19,6 +19,11 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{CVPcaPls}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}
+#' @importFrom methods graphics stats setClass setGeneric setMethod setRefClass
+#' @importFrom grDevices
+#' @importFrom hasArg new
+#' @importFrom coef density median na.exclude p.adjust princomp qnorm quantile
+#' @importFrom abline arrows axis barplot box boxplot legend lines par points
 
 setClass("cvpp",representation(Results="data.frame",Ncv="numeric",Method="vector",CVtrain="matrix",CVtest="matrix",Select="numeric"),
          prototype=list(Results=data.frame(1),Ncv=numeric(),Method="PCA",CVtrain=matrix(0,0,0),CVtest=matrix(0,0,0),Select=numeric()))
@@ -55,10 +60,10 @@ setMethod("summary",signature="cvpp", function(object){
   cat("Reduction method used :",object@Method,"\n")
   cat("Number of cross validation: ", object@Ncv, "\n")
   cat("Estimated  quantiles of the HR in the train dataset \n")
-  print(quantile(object@Results[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
+  print(stats::quantile(object@Results[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
   cat("\n")
   cat("Estimated  quantiles of the HR in the test dataset \n")
-  print(quantile(object@Results[,2],probs=c(0.05,0.25,0.5,0.75,0.95)))
+  print(stats::quantile(object@Results[,2],probs=c(0.05,0.25,0.5,0.75,0.95)))
 })
 
 #" setGeneric("plot", function(x,y, ...) standardGeneric("plot"))
@@ -77,15 +82,15 @@ setMethod("plot", signature(x="cvpp", y="missing"),
           function(x,  y, ...) {
             dotsCall = substitute(list(...))
             ll = eval(dotsCall)
-            if(!hasArg("xlab")) ll$xlab = ""
-            if(!hasArg("ylab")) ll$ylab = "HR estimate"
-            if(!hasArg("main")) ll$main = paste("Distribution of HR on Training and Test Set \n for Low risk group using ", x@Method,sep="")
-            if(!hasArg("cex.lab")) ll$cex.lab = 1.5
-            if(!hasArg("cex.main")) ll$cex.main = 1
-            if(!hasArg("ylim")) ll$ylim = c(0, 5) #max(x@Results)
-            if(!hasArg("col")) ll$col = c(2,3)
+            if(!methods::hasArg("xlab")) ll$xlab = ""
+            if(!methods::hasArg("ylab")) ll$ylab = "HR estimate"
+            if(!methods::hasArg("main")) ll$main = paste("Distribution of HR on Training and Test Set \n for Low risk group using ", x@Method,sep="")
+            if(!methods::hasArg("cex.lab")) ll$cex.lab = 1.5
+            if(!methods::hasArg("cex.main")) ll$cex.main = 1
+            if(!methods::hasArg("ylim")) ll$ylim = c(0, 5) #max(x@Results)
+            if(!methods::hasArg("col")) ll$col = c(2,3)
             ll$x=x@Results
-            do.call(boxplot,args=ll)
+            do.call(graphics::boxplot,args=ll)
             #boxplot(x@Results,ylim=c(0,max(x@Results,na.rm=T)),names=c("Train ","Test"),main=mtitle,ylab="HR",col=c("green","red"))
             return(invisible())
           }

@@ -24,35 +24,34 @@
 #' @examples
 #' \donttest{
 #' # Prepare data
-#' Week3_response = read_excel("Week3_response.xlsx")
+#' data(Week3_response)
 #' Week3_response = data.frame(Week3_response)
-#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
-#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
 #' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
 #' as.numeric(Week3_response$T1D)))
 #' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
 #' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
 #' colnames(prog_fam_shan_w3) = c("Treatment")
-#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
-#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' data(fam_shan_trim_w3)
+#' names_fam_shan_trim_w3 =
+#' c("Unknown", "Lachnospiraceae", "S24.7", "Lactobacillaceae", "Enterobacteriaceae", "Rikenellaceae")
 #' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
 #' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
 #' # Running the taxon specific function
-#' Cox_taxon_fam_shan_w3 = MSpecificCoxPh(Survival = survival_data_w3$Survival,
+#' Cox_taxon_fam_shan_w3 = MSpecificCoxPh(Survival = surv_fam_shan_w3$Survival,
 #'                                        Micro.mat = fam_shan_trim_w3,
-#'                                        Censor = survival_data_w3$Censor,
-#'                                        Reduce=TRUE,
+#'                                        Censor = surv_fam_shan_w3$Censor,
+#'                                        Reduce=FALSE,
 #'                                        Select=5,
-#'                                        Prognostic = prog_fam_w3,
+#'                                        Prognostic = prog_fam_shan_w3,
 #'                                        Mean = TRUE,
 #'                                        Method = "BH")
 #'
 #' # Using the function
 #' Majority_fam_shan_w3 = Majorityvotes(Result = Cox_taxon_fam_shan_w3,
-#'                                      Prognostic = prog_fam_w3,
-#'                                      Survival = survival_data_w3$Survival,
-#'                                      Censor = survival_data_w3$Censor,
+#'                                      Prognostic = prog_fam_shan_w3,
+#'                                      Survival = surv_fam_shan_w3$Survival,
+#'                                      Censor = surv_fam_shan_w3$Censor,
 #'                                      J=1)
 #'
 #' # The survival analysis for majority vote result
@@ -67,13 +66,21 @@
 #' # The group for each subject based on the taxon specific analysis
 #' Majority_fam_shan_w3$Group
 #' }
+
+#' @import stats
+#' @import survival
+#' @import graphics
+#' @import base
+#' @importFrom coef density median p.adjust princomp qnorm quantile
+#' @importFrom abline arrows axis barplot box boxplot legend lines par points
+
 #' @export Majorityvotes
 
 
 Majorityvotes=function(Result, Prognostic, Survival, Censor, J=1){
 
 
-  if (class(Result)!="ms") stop("Invalid class object.")
+  if (inherits(Result, "ms") == FALSE) stop("Invalid class object.")
   if (missing(Survival)) stop("Argument 'Survival' is missing...")
   if (missing(Censor)) stop("Argument 'Censor' is missing...")
 
@@ -94,7 +101,7 @@ Majorityvotes=function(Result, Prognostic, Survival, Censor, J=1){
   if (is.null(Prognostic)) {
 
     cdata = data.frame(Survival,Censor,ggr)
-    m0 = survival::coxph(Surv(Survival, Censor==1) ~ ggr,data=cdata)
+    m0 = survival::coxph(survival::Surv(Survival, Censor==1) ~ ggr,data=cdata)
   }
 
   if (!is.null(Prognostic)) {
@@ -102,7 +109,7 @@ Majorityvotes=function(Result, Prognostic, Survival, Censor, J=1){
       nProg=ncol(Prognostic)
       cdata = data.frame(Survival,Censor,ggr,Prognostic)
       NameProg=colnames(Prognostic)
-      eval(parse(text=paste( "m0 =survival::coxph(Surv(Survival, Censor==1) ~ ggr",paste("+",NameProg[1:nProg],sep="",collapse =""),",data=cdata)" ,sep="")))
+      eval(parse(text=paste( "m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ ggr",paste("+",NameProg[1:nProg],sep="",collapse =""),",data=cdata)" ,sep="")))
     } else {
 
       stop(" Argument 'Prognostic' is NOT a data frame ")
@@ -117,14 +124,14 @@ Majorityvotes=function(Result, Prognostic, Survival, Censor, J=1){
   Jmax=floor(np/n0)
   if (J<=Jmax) {
     slist=(1+(J-1)*ng):(J*ng)
-    par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
+    graphics::par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
     plot(0,0, xlim=c(0,n0),ylim=c(1,ng),xlab="Subject Index",ylab="Taxa",axes=FALSE,type="n", main="Taxon-Specific Classification of subjects",cex.main=0.9)
     for(i in 1:n0){
-      points(rep(i, ng)[t(VoteMat)[i, slist]=="Low risk"],which(t(VoteMat)[i, slist]=="Low risk"),col="blue", pch=15)
-      points(rep(i, ng)[t(VoteMat)[i, slist]=="High risk"],which(t(VoteMat)[i, slist]=="High risk"),col="yellow", pch=15)
+      graphics::points(rep(i, ng)[t(VoteMat)[i, slist]=="Low risk"],which(t(VoteMat)[i, slist]=="Low risk"),col="blue", pch=15)
+      graphics::points(rep(i, ng)[t(VoteMat)[i, slist]=="High risk"],which(t(VoteMat)[i, slist]=="High risk"),col="yellow", pch=15)
     }
-    axis(1, at = 1:n0);axis(2,at=1:ng,slist);box()
-    legend("topright",inset=c(-0.37,0), c("Low Risk","High Risk"),
+    graphics::axis(1, at = 1:n0);graphics::axis(2,at=1:ng,slist);graphics::box()
+    graphics::legend("topright",inset=c(-0.37,0), c("Low Risk","High Risk"),
            pch=c(15,15),col=c("blue", "yellow"), cex=0.6)
   } else {stop("J should be less than or equal to (no.of subjects / number of selected subjects)")
   }

@@ -63,24 +63,23 @@ Optimum lambda will be used to select the non-zero shrinkage coefficients, the n
 \examples{
 \donttest{
 # Prepare data
-Week3_response = read_excel("Week3_response.xlsx")
+data(Week3_response)
 Week3_response = data.frame(Week3_response)
-Week3_response = Week3_response[order(Week3_response$SampleID), ]
-Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
 surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
 as.numeric(Week3_response$T1D)))
 colnames(surv_fam_shan_w3) = c("Survival", "Censor")
 prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
 colnames(prog_fam_shan_w3) = c("Treatment")
-fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
-names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+data(fam_shan_trim_w3)
+names_fam_shan_trim_w3 =
+c("Unknown", "Lachnospiraceae", "S24.7", "Lactobacillaceae", "Enterobacteriaceae", "Rikenellaceae")
 fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
 rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 # Using the function
-lasso_fam_shan_w3 = Lasoelascox(Survival = survival_data_w3$Survival,
-                                Censor = survival_data_w3$Censor,
+lasso_fam_shan_w3 = Lasoelascox(Survival = surv_fam_shan_w3$Survival,
+                                Censor = surv_fam_shan_w3$Censor,
                                 Micro.mat = fam_shan_trim_w3,
-                                Prognostic = prog_fam_w3,
+                                Prognostic = prog_fam_shan_w3,
                                 Plots = TRUE,
                                 Standardize = TRUE,
                                 Alpha = 1,

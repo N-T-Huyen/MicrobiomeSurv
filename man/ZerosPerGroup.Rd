@@ -30,7 +30,7 @@ ZerosPerGroup(
 
 \item{n.mi}{Number of taxa.}
 
-\item{plot}{A boolean parameter indicating if the plot should be shown. Default is FALSE}
+\item{plot}{A boolean parameter indicating if the plot should be shown. Default is FALSE.}
 }
 \value{
 A matrix with information of number and the proportion of zeros per groups.
@@ -43,19 +43,22 @@ This function returns a matrix with rows are Micros and 9 columns containing num
 \examples{
 \donttest{
 # Preparing data for analysis at OTU level
-Week3_otu = read_excel("Week3_otu.xlsx")
+data(Week3_otu)
+data(Week3_response)
 Week3_otu = data.frame(Week3_otu)
 otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
-Week3_otu$Treatment_new = ifelse(Week3_otu$Treatment == "3PATCON", 0, 1)
-n_obs = dim(otu_w3)[2]
-n_control = table(Week3_otu$Treatment_new)[1]
-n_treated = table(Week3_otu$Treatment_new)[2]
+n_obs = dim(otu_mat_w3)[2]
+n_control = table(Week3_response$Treatment_new)[1]
+n_treated = table(Week3_response$Treatment_new)[2]
 n_otu = dim(otu_mat_w3)[1]
 # Calculate zeros per groups
 zero_per_group_otu_w3 = ZerosPerGroup(Micro.mat = otu_mat_w3,
-                                     groups = Week3_otu$Treatment_new, week = 3,
-                                     n.obs = n_obs, n.control = n_control,
-                                     n.treated = n_treated, n.mi = n_otu,
+                                     groups = Week3_response$Treatment_new,
+                                     week = 3,
+                                     n.obs = n_obs,
+                                     n.control = n_control,
+                                     n.treated = n_treated,
+                                     n.mi = n_otu,
                                      plot = TRUE)
 }
 }

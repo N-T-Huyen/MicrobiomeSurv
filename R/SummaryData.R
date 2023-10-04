@@ -13,21 +13,26 @@
 #' @examples
 #' \donttest{
 #' # Read dataset
-#' Week3_otu = read_excel("Week3_otu.xlsx")
+#' data(Week3_otu)
 #' Week3_otu = data.frame(Week3_otu)
 #' otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
-#' fam_info_w3 = read_excel("fam_info_w3.xlsx")
+#' data(fam_info_w3)
 #'
 #' # USing the function
 #' fam_shan_w3 = SummaryData(Micro.mat = otu_mat_w3, info = fam_info_w3, measure = "shannon")
 #' }
+
+#' @import stats
+#' @import microbiome
+#' @import dplyr
+#' @import tidyr
 #' @export SummaryData
 
 SummaryData = function(Micro.mat, info, measure = "observed"){
   Micro.mat = data.frame(Micro.mat)
   Micro.mat$OTUID = rownames(Micro.mat)
   otu.level = merge(Micro.mat, info, by = "OTUID")
-  nest = otu.level[, -c(1)]%>% group_by(across(dim(otu.level)[2] - 1)) %>% nest() # group by levelily or other level
+  nest = tidyr::nest(dplyr::group_by(otu.level[, -c(1)], dplyr::across(dim(otu.level)[2] - 1))) # group by levelily or other level
   level = function(nest){
     lapply(1:length(nest$data), function(i) {
     level.measure = microbiome::alpha(data.matrix(nest$data[[i]]), index = measure)

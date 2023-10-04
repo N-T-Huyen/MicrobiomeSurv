@@ -27,12 +27,12 @@ This function is used for the second step of filtering which removes OTUs based 
 \examples{
 \donttest{
 # Read dataset
-Week3_otu = read_excel("Week3_otu.xlsx")
+data(Week3_otu)
 Week3_otu = data.frame(Week3_otu)
 otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
 
 # Import dataset from the result of zero_per_group
-data_zero_per_group_otu_w3 = read_excel("data_zero_per_group_otu_w3.xlsx")
+data(data_zero_per_group_otu_w3)
 
 # Using the function
 otu_trim_w3 = SecondFilter(zero.per.group = data_zero_per_group_otu_w3,

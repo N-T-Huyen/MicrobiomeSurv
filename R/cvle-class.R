@@ -1,6 +1,6 @@
 #' The cvle Class.
 #'
-#' Class of object returned by function \code{\link[MicrobiomeSurv]{CVLasoelacox}}.
+#' Class of object returned by function \code{\link[MicrobiomeSurv]{CVLasoelascox}}.
 #'
 #' @name cvle-class
 #' @rdname cvle-class
@@ -21,7 +21,11 @@
 #' @author Thi Huyen Nguyen, \email{thihuyen.nguyen@@uhasselt.be}
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
-#' @seealso \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[glmnet]{glmnet}}, \code{\link[MicrobiomeSurv]{Lasoelacox}}
+#' @seealso \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[glmnet]{glmnet}}, \code{\link[MicrobiomeSurv]{Lasoelascox}}
+#' @importFrom methods graphics stats setClass setGeneric setMethod setRefClass
+#' @importFrom grDevices
+#' @importFrom hasArg new
+
 #' @docType class
 
 setClass("cvle", representation(Coef.mat="matrix", lambda="vector", n="vector", mi.mat="matrix",
@@ -60,10 +64,10 @@ setMethod("summary", signature ="cvle"
             cat("Summary of cross valdiateion for Lasso and Elastic Net based taxa\n")
             cat("Number of taxa used: ", length(rownames(object@Micro.mat)), "\n")
             cat("Estimated  quantiles of HR on test data\n")
-            print(quantile(object@HRTest[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
+            print(stats::quantile(object@HRTest[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
             cat("\n")
             cat("Estimated quantiles of HR on train data\n")
-            print(quantile(object@HRTrain[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
+            print(stats::quantile(object@HRTrain[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
             cat("Mostly selected 5 taxa:\n")
             Freq=colSums(object@mi.mat)
             names(Freq)=rownames(object@Micro.mat)
@@ -86,7 +90,7 @@ print(names(sFreq)[1:maxG])
 #' @aliases cvle-method
           setMethod(f ="plot", signature(x="cvle", y="missing"),
                     function(x,  y, type=1, ...) {
-                      if (class(x)!="cvle") stop("Invalid class object")
+                      if (inherits(x, "cvle") == FALSE) stop("Invalid class object")
                       if (type==1) {
 
                         DistHR=data.frame(HRTrain=x@HRTrain[,1],HRTest=x@HRTest[,1])
@@ -94,14 +98,14 @@ print(names(sFreq)[1:maxG])
                         colnames(DistHR)=c("Training","Test")
                         dotsCall = substitute(list(...))
                         ll = eval(dotsCall)
-                        if(!hasArg("xlab")) ll$xlab = ""
-                        if(!hasArg("ylab")) ll$ylab = "HR estimate"
+                        if(!methods::hasArg("xlab")) ll$xlab = ""
+                        if(!methods::hasArg("ylab")) ll$ylab = "HR estimate"
                         ll$main = "Distribution of HR on Training and Test Set \n for Low risk group"
-                        if(!hasArg("cex.lab")) ll$cex.lab = 1.5
-                        if(!hasArg("cex.main")) ll$cex.main = 1
-                        if(!hasArg("col")) ll$col = 2:3
+                        if(!methods::hasArg("cex.lab")) ll$cex.lab = 1.5
+                        if(!methods::hasArg("cex.main")) ll$cex.main = 1
+                        if(!methods::hasArg("col")) ll$col = 2:3
                         ll$x=DistHR
-                        do.call(boxplot,args=ll)
+                        do.call(graphics::boxplot,args=ll)
 
                       }
 
@@ -111,12 +115,12 @@ print(names(sFreq)[1:maxG])
                         HRTest=x@HRTest[,1]
                         dotsCall = substitute(list(...))
                         ll = eval(dotsCall)
-                        if(!hasArg("xlab")) ll$xlab = "Estimated HR on Test Data"
-                        if(!hasArg("ylab")) ll$ylab = "Number of non zero coef."
+                        if(!methods::hasArg("xlab")) ll$xlab = "Estimated HR on Test Data"
+                        if(!methods::hasArg("ylab")) ll$ylab = "Number of non zero coef."
                         ll$main = "HR vs number of taxa"
-                        if(!hasArg("cex.lab")) ll$cex.lab = 0.8
-                        if(!hasArg("cex.main")) ll$cex.main = 1
-                        if(!hasArg("col")) ll$col = 2
+                        if(!methods::hasArg("cex.lab")) ll$cex.lab = 0.8
+                        if(!methods::hasArg("cex.main")) ll$cex.main = 1
+                        if(!methods::hasArg("col")) ll$col = 2
                         ll$x=HRTest
                         ll$y=x@n
                         do.call(plot,args=ll)

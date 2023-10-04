@@ -7,7 +7,7 @@
 #'@param n.control Number of patients in control group or in the first group.
 #'@param n.treated Number of patients in treated group or in the second group.
 #'@param n.mi Number of taxa.
-#'@param plot A boolean parameter indicating if the plot should be shown. Default is FALSE
+#'@param plot A boolean parameter indicating if the plot should be shown. Default is FALSE.
 
 #'@return A matrix with information of number and the proportion of zeros per groups.
 #' \item{zero.per.group}{A matrix with rows are Micros and 9 columns containing number and the proportion of zeros per groups of treatments and in total.}
@@ -19,25 +19,28 @@
 #' @examples
 #' \donttest{
 #' # Preparing data for analysis at OTU level
-#' Week3_otu = read_excel("Week3_otu.xlsx")
+#' data(Week3_otu)
+#' data(Week3_response)
 #' Week3_otu = data.frame(Week3_otu)
 #' otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
-#' Week3_otu$Treatment_new = ifelse(Week3_otu$Treatment == "3PATCON", 0, 1)
-#' n_obs = dim(otu_w3)[2]
-#' n_control = table(Week3_otu$Treatment_new)[1]
-#' n_treated = table(Week3_otu$Treatment_new)[2]
+#' n_obs = dim(otu_mat_w3)[2]
+#' n_control = table(Week3_response$Treatment_new)[1]
+#' n_treated = table(Week3_response$Treatment_new)[2]
 #' n_otu = dim(otu_mat_w3)[1]
 
 #' # Calculate zeros per groups
 #' zero_per_group_otu_w3 = ZerosPerGroup(Micro.mat = otu_mat_w3,
-#'                                      groups = Week3_otu$Treatment_new, week = 3,
-#'                                      n.obs = n_obs, n.control = n_control,
-#'                                      n.treated = n_treated, n.mi = n_otu,
+#'                                      groups = Week3_response$Treatment_new,
+#'                                      week = 3,
+#'                                      n.obs = n_obs,
+#'                                      n.control = n_control,
+#'                                      n.treated = n_treated,
+#'                                      n.mi = n_otu,
 #'                                      plot = TRUE)
 #' }
-#' @import utils
+
 #' @import stats
-#' @import Biobase
+#' @import ggplot2
 
 #' @export ZerosPerGroup
 
@@ -84,7 +87,9 @@ ZerosPerGroup = function(Micro.mat, groups, week = 0,
   zero.per.group[,7] = Control + Treated
   zero.per.group[,8] = (Control + Treated)/n.obs
   zero.per.group[,9] = n.obs
-
+  n = rep(NA, 2*n.mi)
+  pp = rep(NA, 2*n.mi)
+  Treatment = rep(NA, 2*n.mi)
   prop.zero.group = data.frame(Microu = c(row.names(zero.per.group), row.names(zero.per.group)),
                                n = 1: n.mi,
                                pp = c(zero.per.group[,2], zero.per.group[,5]),
@@ -92,15 +97,15 @@ ZerosPerGroup = function(Micro.mat, groups, week = 0,
 
   # Produce plots if requested
   if (plot == TRUE){
-    plot = ggplot(prop.zero.group, aes(x=n, y=pp, color= Treatment))+
-      geom_point()+
-      facet_grid( ~ Treatment)+
-      theme(legend.position="bottom", legend.direction="horizontal",
-            legend.title = element_blank(), plot.title = element_text(hjust = 0.5)) +
-      scale_color_manual("Treatment", values = c("3PAT"="red4","3PATCON"="blue"),
+    plot = ggplot2::ggplot(prop.zero.group, ggplot2::aes(x=n, y=pp, color= Treatment))+
+      ggplot2::geom_point()+
+      ggplot2::facet_grid( ~ Treatment)+
+      ggplot2::theme(legend.position="bottom", legend.direction="horizontal",
+            legend.title = ggplot2::element_blank(), plot.title = ggplot2::element_text(hjust = 0.5)) +
+      ggplot2::scale_color_manual("Treatment", values = c("3PAT"="red4","3PATCON"="blue"),
                          labels=c("3PAT"="3PAT","3PATCON"="3PATCON"),
-                         guide = guide_legend(direction="horizontal")) +
-      xlab(" ") + ylab("% of 0s")
+                         guide = ggplot2::guide_legend(direction="horizontal")) +
+      ggplot2::xlab(" ") + ggplot2::ylab("% of 0s")
     plot
   }
 

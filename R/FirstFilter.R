@@ -13,7 +13,7 @@
 #' @examples
 #' \donttest{
 #' # Preparing data for analysis at OTU level
-#' Week3_otu = read_excel("Week3_otu.xlsx")
+#' data(Week3_otu)
 #' Week3_otu = data.frame(Week3_otu)
 #' otu_mat_w3 = t(data.matrix(Week3_otu[ , 1:2720]))
 #' colnames(otu_mat_w3) = Week3_otu$SampleID
@@ -22,9 +22,9 @@
 #' otu_w3 = FirstFilter(Micro.mat = otu_mat_w3)
 #' }
 #'
-#' @import utils
+
 #' @import stats
-#' @import Biobase
+
 
 #' @export FirstFilter
 

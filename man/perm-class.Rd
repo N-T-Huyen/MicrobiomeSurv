@@ -46,7 +46,7 @@ median  and upper CI of the permuted data estimated HR while
 the red line is the estimated HR of the original data
 }
 \seealso{
-\code{\link[MicrobiomeSurv]{DistHR}}, \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}, \code{\link[MicrobiomeSurv]{Majorityvotes}}, \code{\link[MicrobiomeSurv]{Lasoelacox}}
+\code{\link[MicrobiomeSurv]{DistHR}}, \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}, \code{\link[MicrobiomeSurv]{Majorityvotes}}, \code{\link[MicrobiomeSurv]{Lasoelascox}}
 }
 \author{
 Thi Huyen Nguyen, \email{thihuyen.nguyen@uhasselt.be}

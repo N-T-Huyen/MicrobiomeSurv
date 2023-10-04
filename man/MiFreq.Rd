@@ -4,12 +4,14 @@
 \alias{MiFreq}
 \title{Frequency of Selected Taxa from the LASSO, Elastic-net Cross-Validation}
 \usage{
-MiFreq(Object, TopK = 20)
+MiFreq(Object, TopK = 20, N = 3)
 }
 \arguments{
-\item{Object}{An object of class \code{\link[MicrobiomeSurv]{cvle}} returned from the function \code{\link[MicrobiomeSurv]{CVLasoelacox}}.}
+\item{Object}{An object of class \code{\link[MicrobiomeSurv]{cvle}} returned from the function \code{\link[MicrobiomeSurv]{CVLasoelascox}}.}
 
 \item{TopK}{The number of Top K taxa (5 by default) to be displayed in the frequency of selection graph.}
+
+\item{N}{The taxa with the specified frequency should be displayed in the frequency of selection graph.}
 }
 \value{
 A vector of taxa and their frequency of selection. Also, a graphical representation is displayed.
@@ -24,38 +26,37 @@ In addition, it visualizes the selected top taxa based on the minimum frequency 
 \examples{
 \donttest{
 # Prepare data
-Week3_response = read_excel("Week3_response.xlsx")
+data(Week3_response)
 Week3_response = data.frame(Week3_response)
-Week3_response = Week3_response[order(Week3_response$SampleID), ]
-Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
 surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
 as.numeric(Week3_response$T1D)))
 colnames(surv_fam_shan_w3) = c("Survival", "Censor")
 prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
 colnames(prog_fam_shan_w3) = c("Treatment")
-fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
-names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+data(fam_shan_trim_w3)
+names_fam_shan_trim_w3 =
+c("Unknown", "Lachnospiraceae", "S24.7", "Lactobacillaceae", "Enterobacteriaceae", "Rikenellaceae")
 fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
 rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 # Cross-Validation for LASSO and ELASTIC-NET
-CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = survival_data_w3$Survival,
-                                     Censor = survival_data_w3$Censor,
+CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = surv_fam_shan_w3$Survival,
+                                     Censor = surv_fam_shan_w3$Censor,
                                      Micro.mat = fam_shan_trim_w3,
-                                     Prognostic = prog_fam_w3,
+                                     Prognostic = prog_fam_shan_w3,
                                      Standardize = TRUE,
                                      Alpha = 1,
                                      Fold = 4,
-                                     Ncv = 100,
+                                     Ncv = 10,
                                      nlambda = 100)
 
 
 # Using the function
-MiFreq_fam_shan_w3 = MiFreq(Object = CV_lasso_fam_shan_w3, TopK=5)
+MiFreq_fam_shan_w3 = MiFreq(Object = CV_lasso_fam_shan_w3, TopK=5, N=3)
 }
 }
 \seealso{
 \code{\link[MicrobiomeSurv]{cvmm}}, \code{\link[survival]{coxph}},
-\code{\link[MicrobiomeSurv]{EstimateHR}},\code{\link[MicrobiomeSurv]{CVLasoelacox}}
+\code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{CVLasoelascox}}
 }
 \author{
 Thi Huyen Nguyen, \email{thihuyen.nguyen@uhasselt.be}

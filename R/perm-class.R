@@ -17,7 +17,12 @@
 #' @author Thi Huyen Nguyen, \email{thihuyen.nguyen@@uhasselt.be}
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
-#' @seealso \code{\link[MicrobiomeSurv]{DistHR}}, \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}, \code{\link[MicrobiomeSurv]{Majorityvotes}}, \code{\link[MicrobiomeSurv]{Lasoelacox}}
+#' @seealso \code{\link[MicrobiomeSurv]{DistHR}}, \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[MicrobiomeSurv]{SurvPcaClass}}, \code{\link[MicrobiomeSurv]{SurvPlsClass}}, \code{\link[MicrobiomeSurv]{Majorityvotes}}, \code{\link[MicrobiomeSurv]{Lasoelascox}}
+#' @importFrom methods graphics stats setClass setGeneric setMethod setRefClass
+#' @importFrom grDevices
+#' @importFrom hasArg new
+#' @importFrom coef density median na.exclude p.adjust princomp qnorm quantile
+#' @importFrom abline arrows axis barplot box boxplot legend lines par points
 
 #' @note The first, third and last vertical line on the plot are the lower,
 #' median  and upper CI of the permuted data estimated HR while
@@ -56,7 +61,7 @@ setMethod("summary",signature="perm", function(object){
   cat("Number of Permutations: ", object@nperm, "\n")
   cat("\n")
   cat("Estimated  quantiles of the null distribution of HR\n")
-  print(quantile(object@HRperm[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
+  print(stats::quantile(object@HRperm[,1],probs=c(0.05,0.25,0.5,0.75,0.95)))
   cat("\n")
   cat("Estimated HR on original data\n")
   ttt=object@HRobs
@@ -76,31 +81,31 @@ setMethod("summary",signature="perm", function(object){
 #' @aliases perm-method
 setMethod("plot", signature("perm"),
           function(x, y, ...) {
-            if (class(x)!="perm") stop("Invalid class object")
+            if (inherits(x, "perm") == FALSE) stop("Invalid class object")
 
             HR=x@HRperm[,1]
-            HR=na.exclude(HR)
+            HR=stats::na.exclude(HR)
             n=x@nperm
             vv=x@HRobs[1]
             pvalue=sum(vv>HR)/n
 
              dotsCall = substitute(list(...))
             ll = eval(dotsCall)
-            if(!hasArg("xlab")) ll$xlab = paste("Estimated HR: Emperical p-value = ", pvalue ,sep="")
-            if(!hasArg("ylab")) ll$ylab = ""
+            if(!methods::hasArg("xlab")) ll$xlab = paste("Estimated HR: Emperical p-value = ", pvalue ,sep="")
+            if(!methods::hasArg("ylab")) ll$ylab = ""
             ll$main = "Null Distribution of HR on Permuted Data \n for low risk group"
-            if(!hasArg("cex.lab")) ll$cex.lab = 0.8
-            if(!hasArg("cex.main")) ll$cex.main = 1
-            if(!hasArg("col")) ll$col = 1
-            if(!hasArg("ylim")) ll$ylim = c(0,4)
+            if(!methods::hasArg("cex.lab")) ll$cex.lab = 0.8
+            if(!methods::hasArg("cex.main")) ll$cex.main = 1
+            if(!methods::hasArg("col")) ll$col = 1
+            if(!methods::hasArg("ylim")) ll$ylim = c(0,4)
 
-            ll$x = density(HR,from=0,to=(max(HR)+0.25))
+            ll$x = stats::density(HR,from=0,to=(max(HR)+0.25))
             do.call(plot,args=ll)
-            abline(v=vv,col=2)
+            graphics::abline(v=vv,col=2)
             #CI for permuated cases
-            qq=quantile(sort(HR),prob=c(0.05,0.95))
-            abline(v=qq[1],col=3)
-            abline(v=qq[2],col=3)
-            abline(v=median(HR),col=3,lwd=3)
+            qq=stats::quantile(sort(HR),prob=c(0.05,0.95))
+            graphics::abline(v=qq[1],col=3)
+            graphics::abline(v=qq[2],col=3)
+            graphics::abline(v=stats::median(HR),col=3,lwd=3)
             })
 

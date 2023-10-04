@@ -36,25 +36,24 @@
 #' @examples
 #' \donttest{
 #' # Prepare data
-#' Week3_response = read_excel("Week3_response.xlsx")
+#' data(Week3_response)
 #' Week3_response = data.frame(Week3_response)
-#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
-#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
 #' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
 #' as.numeric(Week3_response$T1D)))
 #' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
 #' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
 #' colnames(prog_fam_shan_w3) = c("Treatment")
-#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
-#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' data(fam_shan_trim_w3)
+#' names_fam_shan_trim_w3 =
+#' c("Unknown", "Lachnospiraceae", "S24.7", "Lactobacillaceae", "Enterobacteriaceae", "Rikenellaceae")
 #' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
 #' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
 #' # Using the function
-#' lasso_fam_shan_w3 = Lasoelascox(Survival = survival_data_w3$Survival,
-#'                                 Censor = survival_data_w3$Censor,
+#' lasso_fam_shan_w3 = Lasoelascox(Survival = surv_fam_shan_w3$Survival,
+#'                                 Censor = surv_fam_shan_w3$Censor,
 #'                                 Micro.mat = fam_shan_trim_w3,
-#'                                 Prognostic = prog_fam_w3,
+#'                                 Prognostic = prog_fam_shan_w3,
 #'                                 Plots = TRUE,
 #'                                 Standardize = TRUE,
 #'                                 Alpha = 1,
@@ -74,9 +73,13 @@
 #' # View the survival analysis result
 #' lasso_fam_shan_w3$SurvFit
 #' }
-#' @import utils
+
 #' @import stats
-#' @import Biobase
+#' @import glmnet
+#' @import survival
+#' @import graphics
+#' @importFrom coef density median p.adjust princomp qnorm quantile
+#' @importFrom abline arrows axis barplot box boxplot legend lines par points
 
 
 #' @export Lasoelascox
@@ -115,7 +118,7 @@ Lasoelascox = function (Survival,
 
   # Survival times must be larger than 0
 
-  Survival[Survival <= 0] = quantile(Survival, probs = 0.01)
+  Survival[Survival <= 0] = stats::quantile(Survival, probs = 0.01)
   Lasso.Cox.CV = glmnet::cv.glmnet(x = data.matrix(Data.Full),
                                     y = survival::Surv(as.vector(Survival),as.vector(Censor) == 1),
                                     family = 'cox',
@@ -130,7 +133,7 @@ Lasoelascox = function (Survival,
 
   Lambda = Lasso.Cox.CV$lambda.min
   Alllamda = Lasso.Cox.CV$lambda
-  Coefficients = coef(Lasso.Cox.CV, s =Lambda)
+  Coefficients = stats::coef(Lasso.Cox.CV, s =Lambda)
   Coefficients.NonZero = Coefficients[Coefficients[, 1] != 0, ]
 
   if (!is.null(dim(Coefficients.NonZero)))
@@ -161,7 +164,7 @@ Lasoelascox = function (Survival,
 
   while (n <= 0) {
     Lambda.Index.Add = Lambda.Index.Add + 1
-    Coefficients = coef(Lasso.Cox.CV, s = Lambda.Index + Lambda.Index.Add)
+    Coefficients = stats::coef(Lasso.Cox.CV, s = Lambda.Index + Lambda.Index.Add)
     Coefficients.NonZero = Coefficients[Coefficients[, 1] != 0,]
 
     if (!is.null(dim(Coefficients.NonZero))){
@@ -194,7 +197,7 @@ Lasoelascox = function (Survival,
 
   if (Plots)
   {
-    par(mfrow=c(1,2))
+    graphics::par(mfrow=c(1,2))
     # Plot 1
 
     plot(log(Lasso.Cox.CV$lambda), Lasso.Cox.CV$cvm,
@@ -204,7 +207,7 @@ Lasoelascox = function (Survival,
          pch = 19, col = 'red')
 
     for (i in 1:length(Lasso.Cox.CV$cvm))
-      lines(log(c(Lasso.Cox.CV$lambda[i], Lasso.Cox.CV$lambda[i])), c(Lasso.Cox.CV$cvlo[i], Lasso.Cox.CV$cvup[i]))
+      graphics::lines(log(c(Lasso.Cox.CV$lambda[i], Lasso.Cox.CV$lambda[i])), c(Lasso.Cox.CV$cvlo[i], Lasso.Cox.CV$cvup[i]))
 
     Lasso.Cox = glmnet::glmnet(x = data.matrix(Data.Full),
                                 y = survival::Surv(as.vector(Survival),as.vector(Censor) == 1),
@@ -217,7 +220,7 @@ Lasoelascox = function (Survival,
     # Plot 2
 
     plot(Lasso.Cox, xvar = 'lambda', label = TRUE,xlab=expression(lambda))
-    abline(v = log(Lambda), lwd = 2, lty = 2, col = 'red')
+    graphics::abline(v = log(Lambda), lwd = 2, lty = 2, col = 'red')
 
   }
   return(list(Coefficients.NonZero=Coefficients.NonZero,

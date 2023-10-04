@@ -1,16 +1,16 @@
 #' The cvmm Class.
 #'
-#' Class of object returned by function \code{\link[MicrobiomeSurv]{CVMspecificCoxPh}}.
+#' Class of object returned by function \code{\link[MicrobiomeSurv]{CVMSpecificCoxPh}}.
 #'
-#' plot signature(x = "cvmm"): Plots for \code{\link[MicrobiomeSurv]{CVMspecificCoxPh}} class analysis results.
+#' plot signature(x = "cvmm"): Plots for \code{\link[MicrobiomeSurv]{CVMSpecificCoxPh}} class analysis results.
 #'
 #' Any parameters of \code{\link[graphics]{plot.default}} may be passed on to this particular plot method.
 #'
 #' @rdname cvmm-class
 #' @exportClass cvmm
-#' @param x	 A CVMspecificCoxPh class object
+#' @param x	 A CVMSpecificCoxPh class object \code{\link[MicrobiomeSurv]{CVMSpecificCoxPh}}
 #' @param y	 missing
-#' @param object A CVMspecificCoxPh class object
+#' @param object A CVMSpecificCoxPh class object
 #' @param which This specify which taxon for which estimated HR information need to be visualized. By default results of the first taxon is used.
 #' @param ...	The usual extra arguments to generic functions — see \code{\link[graphics]{plot}}, \code{\link[graphics]{plot.default}}
 #' @slot HRTrain A 3-way array, The first dimension is the number of taxa, the second dimension is the HR statistics for the low risk group in the train dataset (HR,1/HR LCI, UCI) while the third dimension is the number of cross validation performed.
@@ -23,7 +23,11 @@
 #' @author Thi Huyen Nguyen, \email{thihuyen.nguyen@@uhasselt.be}
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
-#' @seealso \code{\link[MicrobiomeSurv]{CVMspecificCoxPh}}
+#' @seealso \code{\link[MicrobiomeSurv]{CVMSpecificCoxPh}}
+#' @importFrom methods graphics stats setClass setGeneric setMethod setRefClass base
+#' @importFrom grDevices
+#' @importFrom hasArg new
+#' @importFrom abline arrows axis barplot box boxplot legend lines par points
 
 setClass("cvmm",slots = representation(HRTrain="array",HRTest="array",train="matrix",test="matrix",n.mi="numeric",Ncv="numeric",Rdata="matrix"),
          prototype=list(HRTrain=array(NA,dim=c(1,1,1)),HRTest=array(NA,dim=c(1,1,1)),train=matrix(0,0,0), test=matrix(0,0,0),n.mi=1,Ncv=3,Rdata=matrix(0,0,0)))
@@ -55,17 +59,17 @@ setMethod("summary",signature="cvmm"
             HRTest  = object@HRTest[which,,][1,]
             HRTrain = object@HRTrain[which,,][1,]
 
-            mean.alpha = median(HRTrain,na.rm=T)
-            se.alphal = quantile(HRTrain,na.rm=T,probs = c(0.025))
-            se.alphau = quantile(HRTrain,na.rm=T,probs = c(0.975))
+            mean.alpha = stats::median(HRTrain,na.rm=T)
+            se.alphal = stats::quantile(HRTrain,na.rm=T,probs = c(0.025))
+            se.alphau = stats::quantile(HRTrain,na.rm=T,probs = c(0.975))
             cat("Estimated HR for Train Dataset \n")
             cat(paste(round(mean.alpha,4),"(",round(se.alphal,4)," , ",
                       round(se.alphau,4),")",sep=""))
 
             cat("\n")
-            mean.alpha = median(HRTest,na.rm=T)
-            se.alphal = quantile(HRTest,na.rm=T,probs = c(0.025))
-            se.alphau = quantile(HRTest,na.rm=T,probs = c(0.975))
+            mean.alpha = stats::median(HRTest,na.rm=T)
+            se.alphal = stats::quantile(HRTest,na.rm=T,probs = c(0.025))
+            se.alphau = stats::quantile(HRTest,na.rm=T,probs = c(0.975))
             cat("Estimated HR for Test Dataset \n")
             cat(paste(round(mean.alpha,4),"(",round(se.alphal,4)," , ",
                       round(se.alphau,4),")",sep=""))
@@ -91,17 +95,17 @@ setMethod(f="plot", signature = "cvmm",
             Results=data.frame(HRTrain, HRTest)
             dotsCall = substitute(list(...))
             ll = eval(dotsCall)
-            if(!hasArg("xlab")) ll$xlab = ""
+            if(!methods::hasArg("xlab")) ll$xlab = ""
 
-            if(!hasArg("ylab")) ll$ylab = "HR estimate"
-            if(!hasArg("main")) ll$main = paste("Estimated HR of Low risk group for Taxon ", which, "\n Number of CVs = ",x@Ncv,sep="")
-            if(!hasArg("cex.lab")) ll$cex.lab = 1.5
-            if(!hasArg("cex.main")) ll$cex.main = 1
-            if(!hasArg("ylim")) ll$ylim = c(0, 5) #max(max(HRTest), max(HRTrain))
-            if(!hasArg("col")) ll$col = 2:3
-            if(!hasArg("names"))  ll$names=c("Training","Test")
+            if(!methods::hasArg("ylab")) ll$ylab = "HR estimate"
+            if(!methods::hasArg("main")) ll$main = paste("Estimated HR of Low risk group for Taxon ", which, "\n Number of CVs = ",x@Ncv,sep="")
+            if(!methods::hasArg("cex.lab")) ll$cex.lab = 1.5
+            if(!methods::hasArg("cex.main")) ll$cex.main = 1
+            if(!methods::hasArg("ylim")) ll$ylim = c(0, 5) #max(max(HRTest), max(HRTrain))
+            if(!methods::hasArg("col")) ll$col = 2:3
+            if(!methods::hasArg("names"))  ll$names=c("Training","Test")
             ll$x=Results
-            do.call(boxplot,args=ll)
+            do.call(graphics::boxplot,args=ll)
             return(invisible())
           }
 

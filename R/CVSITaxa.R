@@ -25,42 +25,43 @@
 #' @examples
 #' \donttest{
 #' # Prepare data
-#' Week3_response = read_excel("Week3_response.xlsx")
+#' data(Week3_response)
 #' Week3_response = data.frame(Week3_response)
-#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
-#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
 #' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
 #' as.numeric(Week3_response$T1D)))
 #' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
 #' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
 #' colnames(prog_fam_shan_w3) = c("Treatment")
-#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
-#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' data(fam_shan_trim_w3)
+#' names_fam_shan_trim_w3 =
+#' c("Unknown", "Lachnospiraceae", "S24.7", "Lactobacillaceae", "Enterobacteriaceae", "Rikenellaceae")
 #' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
 #' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
 #' # Getting the cvmm object
 #' CVCox_taxon_fam_shan_w3 = CVMSpecificCoxPh(Fold=3,
-#'                                            Survival = survival_data_w3$Survival,
+#'                                            Survival = surv_fam_shan_w3$Survival,
 #'                                            Micro.mat = fam_shan_trim_w3,
-#'                                            Censor = survival_data_w3$Censor,
+#'                                            Censor = surv_fam_shan_w3$Censor,
 #'                                            Reduce=TRUE,
 #'                                            Select=5,
-#'                                            Prognostic=prog_fam_w3,
+#'                                            Prognostic=prog_fam_shan_w3,
 #'                                            Mean = TRUE,
-#'                                            Ncv=100)
+#'                                            Ncv=10)
 #'
 #' # Using the function
 #'  CVSITaxa_fam_shan_w3 = CVSITaxa(Object = CVCox_taxon_fam_shan_w3,
 #'                                  Top=seq(1, 6, by=2),
-#'                                  Survival = survival_data_w3$Survival,
-#'                                  Censor = survival_data_w3$Censor,
-#'                                  Prognostic=prog_fam_w3)
+#'                                  Survival = surv_fam_shan_w3$Survival,
+#'                                  Censor = surv_fam_shan_w3$Censor,
+#'                                  Prognostic=prog_fam_shan_w3)
 #'
 #' # Get the class of the object
 #' class(CVSITaxa_fam_shan_w3)     # An "cvsit" Class
 #' }
-#'
+#' @import stats
+#' @import methods
+#' @importFrom coef density median p.adjust princomp qnorm quantile
 #' @export CVSITaxa
 
 CVSITaxa = function(Object,
@@ -70,7 +71,7 @@ CVSITaxa = function(Object,
                      Prognostic=NULL){
 
    Decrease=FALSE
-  if (class(Object)!="cvmm") stop("Invalid class object.")
+  if (inherits(Object,"cvmm") == FALSE) stop("Invalid class object.")
   if (missing(Survival)) stop("Argument 'Survival' is missing...")
   if (missing(Censor)) stop("Argument 'Censor' is missing...")
 
@@ -82,6 +83,107 @@ CVSITaxa = function(Object,
 
   n.mi=Object@n.mi
   n.patients=ncol(Micro.mat)
+
+  #----------------------------------- function for PCA ----------------------------------------------
+  f.pca = function (x){
+    ca <- match.call()
+    if (ncol(x) > nrow(x)){
+      u = stats::princomp(t(x))
+      u$call = ca
+      return(u)
+    }
+
+    mu = rowMeans(x)
+    xb <- x - mu
+    xb.svd <- svd(xb)
+    pc <- t(xb) %*% xb.svd$u
+    dimnames(pc)[[2]] <- paste("PC", 1:ncol(pc), sep = "")
+    loading <- xb.svd$u
+    dimnames(loading) <- list(paste("V", 1:nrow(loading), sep = ""),
+                              paste("Comp.", 1:ncol(loading), sep = ""))
+    class(loading) <- "loadings"
+    sd = xb.svd$d/sqrt(ncol(x))
+    names(sd) <- paste("Comp.", 1:length(sd), sep = "")
+    pc <- list(sdev = sd, loadings = loading, center = mu,
+               scale = rep(1, length(mu)), n.obs = ncol(x), scores = pc, call = ca)
+    class(pc) <- "princomp"
+    return(pc)
+  }
+
+  #----------------------------------- Intermediate PCA ----------------------------------------------
+
+  IntermediatePCA=function(Micro.mat,
+                           Prognostic,
+                           Survival,
+                           Censor,
+                           index){
+    if (is.matrix(Micro.mat)) {
+      pc1 = f.pca(as.matrix(Micro.mat[ ,index]))[[6]][,1]
+    } else {
+      pc1=Micro.mat[index]
+    }
+
+    if (is.null(Prognostic)) {
+
+      cdata = data.frame(Survival=Survival[index], Censor=Censor[index], pc1)
+      m0 = survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1, data=cdata)
+    }
+
+    if (!is.null(Prognostic)) {
+      if (is.data.frame(Prognostic)) {
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
+        cdata = data.frame(Survival[index], Censor[index], pc1, Prognostic[index,])
+        colnames(cdata) = c("Survival", "Censor", "pc1", NameProg)
+        eval(parse(text=paste( "m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+      } else {
+        stop(" Argument 'Prognostic' is NOT a data frame ")
+      }
+
+    }
+
+    return(list(m0=m0,pc1=pc1,cdata=cdata))
+  }
+
+
+  #---------------------------------------------------------------------------------------------------
+  #----------------------------------- Intermediate PLS ----------------------------------------------
+
+
+  IntermediatePLS=function(Micro.mat,
+                           Prognostic,
+                           Survival,
+                           Censor,
+                           index){
+    if (is.matrix(Micro.mat)) {
+
+      DataPLS=data.frame(1:length(index))
+      DataPLS$g=as.matrix(t(Micro.mat[ ,index]))
+      colnames(DataPLS)[1]=c("Survival")
+      DataPLS[,1]=Survival[index]
+      plsr.1 = pls::plsr(Survival ~ g, method="simpls", ncomp = 2, scale =TRUE,data = DataPLS, validation =  "CV")
+      pc1=pls::scores(plsr.1)[,1] # extract the first com
+    } else {
+      pc1=Micro.mat[index]
+    }
+
+    if (is.null(Prognostic)) {
+      cdata = data.frame(Survival=Survival[index], Censor=Censor[index], pc1)
+      m0 = survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1, data=cdata)
+    }
+    if (!is.null(Prognostic)) {
+      if (is.data.frame(Prognostic)) {
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
+        cdata = data.frame(Survival[index], Censor[index], pc1, Prognostic[index,])
+        colnames(cdata) = c("Survival", "Censor", "pc1", NameProg)
+        eval(parse(text=paste( "m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+      } else {
+        stop(" Argument 'Prognostic' is NOT a data frame ")
+      }
+    }
+    return(list(m0=m0,pc1=pc1,cdata=cdata))
+  }
 
 
   if (Object@n.mi<max(Top)) stop("The max(Top) should be less than or equal to total number of taxa")
@@ -147,5 +249,5 @@ CVSITaxa = function(Object,
 
   Ncv=Object@Ncv
   n.mi=Object@n.mi
-  return(new("cvsit",HRpca=HRPC,HRpls=HRPL,Ntaxa=n.mi,Ncv=Ncv,Top=Top))
+  return(methods::new("cvsit",HRpca=HRPC,HRpls=HRPL,Ntaxa=n.mi,Ncv=Ncv,Top=Top))
   }

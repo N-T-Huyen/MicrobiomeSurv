@@ -23,6 +23,22 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
+Imports:
+    graphics,
+    stats,
+    ggplot2,
+    survival,
+    survminer,
+    glmnet,
+    methods,
+    superpc,
+    lmtest,
+    gplots,
+    tidyr,
+    dplyr,
+    microbiome,
+    pls,
+    grDevices
 Suggests: 
     knitr,
     rmarkdown

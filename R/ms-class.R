@@ -23,7 +23,11 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[MicrobiomeSurv]{MSpecificCoxPh}}
-
+#' @importFrom methods graphics stats setClass setGeneric setMethod setRefClass
+#' @importFrom grDevices rainbow
+#' @importFrom hasArg new
+#' @importFrom coef density median na.exclude p.adjust princomp qnorm quantile
+#' @importFrom abline arrows axis barplot box boxplot legend lines par points
 
 setClass("ms",slots = list(Result="list", HRRG="matrix", Group="matrix", Mi.names="vector"),
          prototype=list(Result=list(1), HRRG=matrix(0,0,0), Group=matrix(0,0,0), Mi.names = vector()))
@@ -67,7 +71,7 @@ setMethod("summary",signature="ms",function(object){
   # FDR corrected CI for top k taxa
   cilevel = 1-0.05*length(object@Mi.names)/nrow(object@HRRG)
 
-  HRpadj = exp(log(object@HRRG[index.Top.Ktaxa,1]) + log(object@HRRG[index.Top.Ktaxa,c(2,3)])-log(object@HRRG[index.Top.Ktaxa,1])*qnorm(cilevel)/1.96)  #
+  HRpadj = exp(log(object@HRRG[index.Top.Ktaxa,1]) + log(object@HRRG[index.Top.Ktaxa,c(2,3)])-log(object@HRRG[index.Top.Ktaxa,1])*stats::qnorm(cilevel)/1.96)  #
   res.topKtaxa=data.frame(Top.Ktaxa.GSplus,HRpadj)
 
   colnames(res.topKtaxa)=c("Mi.names", "HR", "LCI", "UCI", "p-value", "FDRLCI", "FDRUCI")
@@ -96,33 +100,33 @@ setMethod(f="plot", signature = "ms",
             # FDR corrected CI for top k taxa
             cilevel = 1-0.05*5/nrow(object@HRRG)
 
-            HRpadj = exp(log(object@HRRG[index.Top.Ktaxa,1]) + ((log(object@HRRG[index.Top.Ktaxa,c(2,3)])-log(object@HRRG[index.Top.Ktaxa,1]))*qnorm(cilevel)/1.96))  #
+            HRpadj = exp(log(object@HRRG[index.Top.Ktaxa,1]) + ((log(object@HRRG[index.Top.Ktaxa,c(2,3)])-log(object@HRRG[index.Top.Ktaxa,1]))*stats::qnorm(cilevel)/1.96))  #
             res.topKtaxa=data.frame(Top.Ktaxa.GSplus,HRpadj)
 
             colnames(res.topKtaxa)=c("Mi.names","HR","LCI","UCI","p-value", "FDRLCI","FDRUCI")
 
             x.axis= 1:length(object@Mi.names)
 
-            par(mfrow=c(3,1))
+            graphics::par(mfrow=c(3,1))
 
             Group2 = object@Group
             prop = sapply(1:ncol(Group2),function(k) sum(Group2[,k]=="Low risk")/nrow(Group2))
-            barplot(prop, col=rainbow(length(Group2[1,])), xlab = "Subject index", ylab = "Proportion",main = "Proportion of being classified as low risk group",ylim = c(0,max(prop)))
+            graphics::barplot(prop, col=grDevices::rainbow(length(Group2[1,])), xlab = "Subject index", ylab = "Proportion",main = "Proportion of being classified as low risk group",ylim = c(0,max(prop)))
 
 
             plot(x=x.axis, y = res.topKtaxa[,2],
                  ylim= c(0,max(res.topKtaxa[,4])),
                  pch=19, xlab="Taxa", ylab="Hazard ratio",
                  main="Hazard ratio plot with unadjusted confidence interval")
-            arrows(x.axis, res.topKtaxa[,3], x.axis, res.topKtaxa[,4], length=0.05, angle=90, code=3)
-            abline(h=1,col="red2",lwd=2.0)
+            graphics::arrows(x.axis, res.topKtaxa[,3], x.axis, res.topKtaxa[,4], length=0.05, angle=90, code=3)
+            graphics::abline(h=1,col="red2",lwd=2.0)
 
             plot(x=x.axis, y = res.topKtaxa[,2],
                  ylim= c(0,max(res.topKtaxa[,7])),
                  pch=19, xlab="Taxa", ylab="Hazard ratio",
                  main="Hazard ratio plot with adjusted confidence interval")
-            arrows(x.axis, res.topKtaxa[,6], x.axis, res.topKtaxa[,7], length=0.05, angle=90, code=3)
-            abline(h=1,col="red2",lwd=2.0)
+            graphics::arrows(x.axis, res.topKtaxa[,6], x.axis, res.topKtaxa[,7], length=0.05, angle=90, code=3)
+            graphics::abline(h=1,col="red2",lwd=2.0)
 
             return(invisible())
           })

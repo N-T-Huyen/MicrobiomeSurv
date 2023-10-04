@@ -17,21 +17,21 @@
 \S4method{plot}{cvmm,ANY}(x, y, which = 1, ...)
 }
 \arguments{
-\item{object}{A CVMspecificCoxPh class object}
+\item{object}{A CVMSpecificCoxPh class object}
 
 \item{which}{This specify which taxon for which estimated HR information need to be visualized. By default results of the first taxon is used.}
 
-\item{x}{A CVMspecificCoxPh class object}
+\item{x}{A CVMSpecificCoxPh class object \code{\link[MicrobiomeSurv]{CVMSpecificCoxPh}}}
 
 \item{y}{missing}
 
 \item{...}{The usual extra arguments to generic functions — see \code{\link[graphics]{plot}}, \code{\link[graphics]{plot.default}}}
 }
 \description{
-Class of object returned by function \code{\link[MicrobiomeSurv]{CVMspecificCoxPh}}.
+Class of object returned by function \code{\link[MicrobiomeSurv]{CVMSpecificCoxPh}}.
 }
 \details{
-plot signature(x = "cvmm"): Plots for \code{\link[MicrobiomeSurv]{CVMspecificCoxPh}} class analysis results.
+plot signature(x = "cvmm"): Plots for \code{\link[MicrobiomeSurv]{CVMSpecificCoxPh}} class analysis results.
 
 Any parameters of \code{\link[graphics]{plot.default}} may be passed on to this particular plot method.
 }
@@ -54,7 +54,7 @@ Any parameters of \code{\link[graphics]{plot.default}} may be passed on to this 
 }}
 
 \seealso{
-\code{\link[MicrobiomeSurv]{CVMspecificCoxPh}}
+\code{\link[MicrobiomeSurv]{CVMSpecificCoxPh}}
 }
 \author{
 Thi Huyen Nguyen, \email{thihuyen.nguyen@uhasselt.be}

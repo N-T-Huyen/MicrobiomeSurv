@@ -30,29 +30,28 @@
 #' @examples
 #' \donttest{
 #' # Prepare data
-#' Week3_response = read_excel("Week3_response.xlsx")
+#' data(Week3_response)
 #' Week3_response = data.frame(Week3_response)
-#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
-#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
 #' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
 #' as.numeric(Week3_response$T1D)))
 #' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
 #' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
 #' colnames(prog_fam_shan_w3) = c("Treatment")
-#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
-#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' data(fam_shan_trim_w3)
+#' names_fam_shan_trim_w3 =
+#' c("Unknown", "Lachnospiraceae", "S24.7", "Lactobacillaceae", "Enterobacteriaceae", "Rikenellaceae")
 #' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
 #' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
 #' # Using the function
 #' CVPls_fam_shan_w3 = CVPcaPls(Fold = 3,
-#'                             Survival = survival_data_w3$Survival,
+#'                             Survival = surv_fam_shan_w3$Survival,
 #'                             Micro.mat = fam_shan_trim_w3,
-#'                             Censor = survival_data_w3$Censor,
+#'                             Censor = surv_fam_shan_w3$Censor,
 #'                             Reduce=TRUE,
 #'                             Select=5,
-#'                             Prognostic = prog_fam_w3,
-#'                             Ncv=100,
+#'                             Prognostic = prog_fam_shan_w3,
+#'                             Ncv=10,
 #'                             DR = "PLS")
 #'
 #' # Get the class of the object
@@ -63,6 +62,13 @@
 #' summary(CVPls_fam_shan_w3)
 #' plot(CVPls_fam_shan_w3)
 #' }
+#' @import stats
+#' @import superpc
+#' @import lmtest
+#' @import methods
+#' @import survival
+#' @importFrom coef density median p.adjust princomp qnorm quantile
+
 #' @export CVPcaPls
 
 CVPcaPls=function(Fold = 3,
@@ -110,7 +116,7 @@ CVPcaPls=function(Fold = 3,
         p.value.LRT[i] = round(lmtest::lrtest(cox.prog, modeli)[2,5], 4)
       }
 
-      p.value = round(p.adjust(p.value.LRT, method = "BH", n = length(p.value.LRT)), 4)
+      p.value = round(stats::p.adjust(p.value.LRT, method = "BH", n = length(p.value.LRT)), 4)
       summary = cbind(coef, exp.coef, p.value.LRT, p.value)
       rownames(summary) = rownames(Micro.mat)
       colnames(summary) = c("coef", "exp.coef", "p.value.LRT", "p.value")
@@ -143,6 +149,107 @@ CVPcaPls=function(Fold = 3,
   n.test=floor(n.obs/Fold)
   cv.train =matrix(0,Ncv,n.train)
   cv.test  =matrix(0,Ncv,n.test)
+
+  #----------------------------------- function for PCA ----------------------------------------------
+  f.pca = function (x){
+    ca <- match.call()
+    if (ncol(x) > nrow(x)){
+      u = stats::princomp(t(x))
+      u$call = ca
+      return(u)
+    }
+
+    mu = rowMeans(x)
+    xb <- x - mu
+    xb.svd <- svd(xb)
+    pc <- t(xb) %*% xb.svd$u
+    dimnames(pc)[[2]] <- paste("PC", 1:ncol(pc), sep = "")
+    loading <- xb.svd$u
+    dimnames(loading) <- list(paste("V", 1:nrow(loading), sep = ""),
+                              paste("Comp.", 1:ncol(loading), sep = ""))
+    class(loading) <- "loadings"
+    sd = xb.svd$d/sqrt(ncol(x))
+    names(sd) <- paste("Comp.", 1:length(sd), sep = "")
+    pc <- list(sdev = sd, loadings = loading, center = mu,
+               scale = rep(1, length(mu)), n.obs = ncol(x), scores = pc, call = ca)
+    class(pc) <- "princomp"
+    return(pc)
+  }
+
+  #----------------------------------- Intermediate PCA ----------------------------------------------
+
+  IntermediatePCA=function(Micro.mat,
+                           Prognostic,
+                           Survival,
+                           Censor,
+                           index){
+    if (is.matrix(Micro.mat)) {
+      pc1 = f.pca(as.matrix(Micro.mat[ ,index]))[[6]][,1]
+    } else {
+      pc1=Micro.mat[index]
+    }
+
+    if (is.null(Prognostic)) {
+
+      cdata = data.frame(Survival=Survival[index], Censor=Censor[index], pc1)
+      m0 = survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1, data=cdata)
+    }
+
+    if (!is.null(Prognostic)) {
+      if (is.data.frame(Prognostic)) {
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
+        cdata = data.frame(Survival[index], Censor[index], pc1, Prognostic[index,])
+        colnames(cdata) = c("Survival", "Censor", "pc1", NameProg)
+        eval(parse(text=paste( "m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+      } else {
+        stop(" Argument 'Prognostic' is NOT a data frame ")
+      }
+
+    }
+
+    return(list(m0=m0,pc1=pc1,cdata=cdata))
+  }
+
+
+  #---------------------------------------------------------------------------------------------------
+  #----------------------------------- Intermediate PLS ----------------------------------------------
+
+
+  IntermediatePLS=function(Micro.mat,
+                           Prognostic,
+                           Survival,
+                           Censor,
+                           index){
+    if (is.matrix(Micro.mat)) {
+
+      DataPLS=data.frame(1:length(index))
+      DataPLS$g=as.matrix(t(Micro.mat[ ,index]))
+      colnames(DataPLS)[1]=c("Survival")
+      DataPLS[,1]=Survival[index]
+      plsr.1 = pls::plsr(Survival ~ g, method="simpls", ncomp = 2, scale =TRUE,data = DataPLS, validation =  "CV")
+      pc1=pls::scores(plsr.1)[,1] # extract the first com
+    } else {
+      pc1=Micro.mat[index]
+    }
+
+    if (is.null(Prognostic)) {
+      cdata = data.frame(Survival=Survival[index], Censor=Censor[index], pc1)
+      m0 = survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1, data=cdata)
+    }
+    if (!is.null(Prognostic)) {
+      if (is.data.frame(Prognostic)) {
+        nPrgFac=ncol(Prognostic)
+        NameProg=colnames(Prognostic)
+        cdata = data.frame(Survival[index], Censor[index], pc1, Prognostic[index,])
+        colnames(cdata) = c("Survival", "Censor", "pc1", NameProg)
+        eval(parse(text=paste( "m0 =survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1",paste("+",NameProg[1:nPrgFac],sep="",collapse =""),",data=cdata)" ,sep="")))
+      } else {
+        stop(" Argument 'Prognostic' is NOT a data frame ")
+      }
+    }
+    return(list(m0=m0,pc1=pc1,cdata=cdata))
+  }
 
 
   set.seed(123)
@@ -204,7 +311,7 @@ CVPcaPls=function(Fold = 3,
     #######################
     ## test set ###########
 
-    mp1 = median(p1)
+    mp1 = stats::median(p1)
     TestSet=EstimateHR(p2,Data.Survival=ctestdata, Prognostic=data.frame(Prognostic[cv.test[i,],]), Plots = FALSE, Mean = TRUE, Quantile = 0.5)
 
     HRp.test[i,] = summary( TestSet$SurvResult)[[8]][1,]
@@ -216,5 +323,5 @@ CVPcaPls=function(Fold = 3,
 
   Results=data.frame(Training=HRp.train[,1],Test=as.numeric(HRp.test[,1]))
 
-  return(new("cvpp",Results=Results, Ncv=Ncv, Method=DR, CVtrain=cv.train, CVtest=cv.test, Select=n.mi))
+  return(methods::new("cvpp",Results=Results, Ncv=Ncv, Method=DR, CVtrain=cv.train, CVtest=cv.test, Select=n.mi))
 }

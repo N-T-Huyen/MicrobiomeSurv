@@ -7,22 +7,22 @@
 #' Taxa are selected at each iteration and then use for the classifier.
 #' Which implies that predictive taxa is varied from one cross validation to the other depending on selection.
 #' The underline idea is to investigate the Hazard Ratio for the train and test data based on the optimal lambda selected for the non-zero shrinkage coefficients, the nonzero selected taxa will thus be used in the survival analysis and in calculation of the risk scores for each sets of data.
-#' @param Survival A vector of survival time with length equals to number of subjects
-#' @param Censor A vector of censoring indicator
+#' @param Survival A vector of survival time with length equals to number of subjects.
+#' @param Censor A vector of censoring indicator.
 #' @param Micro.mat A large or small microbiome profile matrix. A matrix with microbiome profiles where the number of rows is equal to the number of taxa and number of columns is equal to number of patients.
 #' @param Prognostic A dataframe containing possible prognostic(s) factor and/or treatment effect to be used in the model.
-
 #' @param Standardize A Logical flag for the standardization of the microbiome matrix, prior to fitting the model sequence. The coefficients are always returned on the original scale. Default is standardize=TRUE.
-
-#' @param Alpha The mixing parameter for glmnet (see \code{\link[glmnet]{glmnet}{cvle}}). The range is 0<= Alpha <= 1. The Default is 1
-#' @param Fold number of folds to be used for the cross validation. Its value ranges between 3 and the number of subjects in the dataset
+#' @param Alpha The mixing parameter for glmnet (see \code{\link[glmnet]{glmnet}}). The range is 0<= Alpha <= 1. The Default is 1.
+#' @param Fold Number of folds to be used for the cross validation. Its value ranges between 3 and the number of subjects in the dataset.
 #' @param Ncv Number of validations to be carried out. The default is 10.
 #' @param nlambda The number of lambda values - default is 100 as in glmnet.
+#' @param Mean The cut off value for the classifier, default is the mean cutoff.
+#' @param Quantile If users want to use quantile as cutoff point. They need to specify Mean = FALSE and a quantile that they wish to use. The default is the median cutoff.
 
-#' @return A object of class \code{\link[MicrobiomeSurv]} is returned with the following values
-#'   \item{Coef.mat}{A matrix of coefficients with rows equals to number of cross validations and columns equals to number of taxa}
+#' @return A object of class \code{\link[MicrobiomeSurv]{cvle}} is returned with the following values
+#'   \item{Coef.mat}{A matrix of coefficients with rows equals to number of cross validations and columns equals to number of taxa.}
 #'   \item{lambda}{A vector of estimated optimum lambda for each iterations.}
-#'   \item{n}{A vector of the number of selected metabolites}
+#'   \item{n}{A vector of the number of selected taxa.}
 #'   \item{HRTrain}{A matrix of survival information for the training dataset. It has three columns representing the estimated HR, the 95\% lower confidence interval and the 95\% upper confidence interval.}
 #'   \item{HRTest}{A matrix of survival information for the test dataset. It has three columns representing the estimated HR, the 95\% lower confidence interval and the 95\% upper confidence interval.}
 #'   \item{pld}{A vector of partial likelihood deviance at each cross validations.}
@@ -31,47 +31,45 @@
 #' @author Thi Huyen Nguyen, \email{thihuyen.nguyen@@uhasselt.be}
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
-#' @seealso \code{\link[survival]{coxph}},
-#' \code{\link[Microbiome]{EstimateHR}}, \code{\link[glmnet]{glmnet}}, \code{\link[Microbiome]{Lasoelacox}}
+#' @seealso \code{\link[survival]{coxph}}, \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[glmnet]{glmnet}}, \code{\link[MicrobiomeSurv]{Lasoelascox}}
 #' @examples
 #' \donttest{
 #' # Prepare data
-#' Week3_response = read_excel("Week3_response.xlsx")
+#' data(Week3_response)
 #' Week3_response = data.frame(Week3_response)
-#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
-#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
 #' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
 #' as.numeric(Week3_response$T1D)))
 #' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
 #' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
 #' colnames(prog_fam_shan_w3) = c("Treatment")
-#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
-#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' data(fam_shan_trim_w3)
+#' names_fam_shan_trim_w3 =
+#' c("Unknown", "Lachnospiraceae", "S24.7", "Lactobacillaceae", "Enterobacteriaceae", "Rikenellaceae")
 #' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
 #' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 #'
 #' # Using the function
-#' CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = survival_data_w3$Survival,
-#'                                      Censor = survival_data_w3$Censor,
+#' CV_lasso_fam_shan_w3 = CVLasoelascox(Survival = surv_fam_shan_w3$Survival,
+#'                                      Censor = surv_fam_shan_w3$Censor,
 #'                                      Micro.mat = fam_shan_trim_w3,
-#'                                      Prognostic = prog_fam_w3,
+#'                                      Prognostic = prog_fam_shan_w3,
 #'                                      Standardize = TRUE,
 #'                                      Alpha = 1,
 #'                                      Fold = 4,
-#'                                      Ncv = 100,
+#'                                      Ncv = 10,
 #'                                      nlambda = 100)
 #'
 #' # Number of selected taxa per CV
 #' CV_lasso_fam_shan_w3@n
 #'
 #' # Get the matrix of coefficients
-#' Results@Coef.mat
+#' CV_lasso_fam_shan_w3@Coef.mat
 #'
 #' # Survival information of the train dataset
-#' Results@HRTrain
+#' CV_lasso_fam_shan_w3@HRTrain
 #'
 #' # Survival information of the test dataset
-#' Results@HRTest
+#' CV_lasso_fam_shan_w3@HRTest
 #' }
 #' @export CVLasoelascox
 #' @import superpc
@@ -79,6 +77,8 @@
 #' @import methods
 #' @import grDevices
 #' @import graphics
+#' @import glmnet
+#' @import survival
 
 CVLasoelascox = function(Survival,
                           Censor,
@@ -146,7 +146,7 @@ CVLasoelascox = function(Survival,
     sen= Censor[cv.train[i,]]
     Data.Full2 =Data.Full[cv.train[i,],]
 
-    Lasso.Cox.CV = cv.glmnet(x = data.matrix(Data.Full2),
+    Lasso.Cox.CV = glmnet::cv.glmnet(x = data.matrix(Data.Full2),
                               y = survival::Surv(as.vector(Stime),as.vector(sen) == 1),
                               family = 'cox',
                               alpha = Alpha,
@@ -159,7 +159,7 @@ CVLasoelascox = function(Survival,
 
     Lambda = Lasso.Cox.CV$lambda.min
     Alllamda = Lasso.Cox.CV$lambda
-    Coefficients = coef(Lasso.Cox.CV, s = Lambda)
+    Coefficients = stats::coef(Lasso.Cox.CV, s = Lambda)
     Coefficients.NonZero = Coefficients[Coefficients[, 1] != 0, ]
 
 
@@ -185,15 +185,12 @@ CVLasoelascox = function(Survival,
 
     while (n.mi[i] == 0) {
       Lambda.Index.Add = Lambda.Index.Add + 1
-      Coefficients = coef(Lasso.Cox.CV, s = Lambda.Sequence[Lambda.Index + Lambda.Index.Add])
+      Coefficients = stats::coef(Lasso.Cox.CV, s = Lambda.Sequence[Lambda.Index + Lambda.Index.Add])
       Coefficients.NonZero = Coefficients[Coefficients[, 1] != 0,]
 
-      if (is.null(Prognostic))
-      {
+      if (is.null(Prognostic)){
         Selected.mi = names(Coefficients.NonZero)
-      }
-      else
-      {
+      } else {
         Selected.mi = setdiff(names(Coefficients.NonZero), colnames(Prognostic))
       }
 

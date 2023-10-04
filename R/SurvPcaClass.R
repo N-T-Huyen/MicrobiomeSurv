@@ -27,32 +27,31 @@
 #' @author Olajumoke Evangelina Owokotomo, \email{olajumoke.x.owokotomo@@gsk.com}
 #' @author Ziv Shkedy
 #' @seealso \code{\link[survival]{coxph}},
-#' \code{\link[microbiomeSurv]{EstimateHR}}, \code{\link[stats]{princomp}},
-#'  \code{\link[microbiomeSurv]{SurvPlsClass}}
+#' \code{\link[MicrobiomeSurv]{EstimateHR}}, \code{\link[stats]{princomp}},
+#'  \code{\link[MicrobiomeSurv]{SurvPlsClass}}
 #' @examples
 #' \donttest{
 #' # Prepare data
-#' Week3_response = read_excel("Week3_response.xlsx")
+#' data(Week3_response)
 #' Week3_response = data.frame(Week3_response)
-#' Week3_response = Week3_response[order(Week3_response$SampleID), ]
-#' Week3_response$Treatment_new = ifelse(Week3_response$Treatment=="3PATCON",0,1)
 #' surv_fam_shan_w3 = data.frame(cbind(as.numeric(Week3_response$T1Dweek),
 #' as.numeric(Week3_response$T1D)))
 #' colnames(surv_fam_shan_w3) = c("Survival", "Censor")
 #' prog_fam_shan_w3 = data.frame(factor(Week3_response$Treatment_new))
 #' colnames(prog_fam_shan_w3) = c("Treatment")
-#' fam_shan_trim_w3 = read_excel("fam_shan_trim_w3.xlsx")
-#' names_fam_shan_trim_w3 = c(fam_shan_trim_w3[ ,1])$X.
+#' data(fam_shan_trim_w3)
+#' names_fam_shan_trim_w3 =
+#' c("Unknown", "Lachnospiraceae", "S24.7", "Lactobacillaceae", "Enterobacteriaceae", "Rikenellaceae")
 #' fam_shan_trim_w3 = data.matrix(fam_shan_trim_w3[ ,2:82])
 #' rownames(fam_shan_trim_w3) = names_fam_shan_trim_w3
 
 #' # Using the function
-#' SPCA_fam_shan_w3 = SurvPcaClass(Survival = survival_data_w3$Survival,
+#' SPCA_fam_shan_w3 = SurvPcaClass(Survival = surv_fam_shan_w3$Survival,
 #'                                 Micro.mat = fam_shan_trim_w3,
-#'                                 Censor = survival_data_w3$Censor,
+#'                                 Censor = surv_fam_shan_w3$Censor,
 #'                                 Reduce=TRUE,
 #'                                 Select=5,
-#'                                 Prognostic = prog_fam_w3,
+#'                                 Prognostic = prog_fam_shan_w3,
 #'                                 Plots = TRUE,
 #'                                 Mean = TRUE)
 #'
@@ -68,6 +67,12 @@
 #' # Obtaining the first principal component scores
 #' SPCA_fam_shan_w3$pc1
 #' }
+
+#' @import stats
+#' @import superpc
+#' @import survival
+#' @import lmtest
+#' @import ggplot2
 #' @export SurvPcaClass
 
 
@@ -120,7 +125,7 @@ SurvPcaClass = function(Survival,
         p.value.LRT[i] = round(lmtest::lrtest(cox.prog, modeli)[2,5], 4)
       }
 
-      p.value = round(p.adjust(p.value.LRT, method = "BH", n = length(p.value.LRT)), 4)
+      p.value = round(stats::p.adjust(p.value.LRT, method = "BH", n = length(p.value.LRT)), 4)
       summary = cbind(coef, exp.coef, p.value.LRT, p.value)
       rownames(summary) = rownames(Micro.mat)
       colnames(summary) = c("coef", "exp.coef", "p.value.LRT", "p.value")
@@ -137,6 +142,32 @@ SurvPcaClass = function(Survival,
 
 
   n.mi=nrow(ReduMicro.mat)
+
+  f.pca = function (x){
+    ca = match.call()
+    if (ncol(x) > nrow(x)){
+      u = stats::princomp(t(x))
+      u$call = ca
+      return(u)
+    }
+
+    mu = rowMeans(x)
+    xb = x - mu
+    xb.svd = svd(xb)
+    pc = t(xb) %*% xb.svd$u
+    dimnames(pc)[[2]] = paste("PC", 1:ncol(pc), sep = "")
+    loading = xb.svd$u
+    dimnames(loading) = list(paste("V", 1:nrow(loading), sep = ""),
+                             paste("Comp.", 1:ncol(loading), sep = ""))
+    class(loading) = "loadings"
+    sd = xb.svd$d/sqrt(ncol(x))
+    names(sd) = paste("Comp.", 1:length(sd), sep = "")
+    pc = list(sdev = sd, loadings = loading, center = mu,
+              scale = rep(1, length(mu)), n.obs = ncol(x), scores = pc, call = ca)
+    class(pc) = "princomp"
+    return(pc)
+  }
+
   if (is.matrix(ReduMicro.mat)){
     pc1 = f.pca(as.matrix(ReduMicro.mat))[[6]][,1]
   } else {
@@ -146,7 +177,7 @@ SurvPcaClass = function(Survival,
   if (is.null(Prognostic)) {
 
     cdata = data.frame(Survival,Censor,pc1)
-    m0 = survival::coxph(Surv(Survival, Censor==1) ~ pc1,data=cdata)
+    m0 = survival::coxph(survival::Surv(Survival, Censor==1) ~ pc1,data=cdata)
   }
   if (!is.null(Prognostic)) {
     if (is.data.frame(Prognostic)) {
